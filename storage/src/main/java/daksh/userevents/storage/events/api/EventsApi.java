@@ -29,7 +29,9 @@ public class EventsApi {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public Response createEvent(Event event) {
-        if (event == null) {
+        if (event == null ||
+                event.getName() == null || event.getName().isEmpty() ||
+                event.getDefaultProperties() == null || event.getDefaultProperties().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
