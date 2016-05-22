@@ -1,4 +1,4 @@
-package daksh.userevents.storage.events.model;
+package daksh.userevents.storage.users.model;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
@@ -11,7 +11,7 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import daksh.userevents.storage.events.constants.DataConstants;
+import daksh.userevents.storage.users.constants.DataConstants;
 
 /**
  * Created by daksh on 22-May-16.
@@ -19,7 +19,7 @@ import daksh.userevents.storage.events.constants.DataConstants;
 
 @XmlRootElement
 @Entity(DataConstants.COLLECTION_NAME)
-public class Event implements Serializable {
+public class User implements Serializable {
 
     @Id
     @XmlElement
@@ -35,9 +35,6 @@ public class Event implements Serializable {
     @XmlElement(name = DataConstants.USER_PROPERTIES)
     @Property(DataConstants.USER_PROPERTIES)
     private Map<String, String> userProperties;
-
-    public Event() {
-    }
 
     public ObjectId getId() {
         return id;
@@ -73,7 +70,7 @@ public class Event implements Serializable {
 
     @Override
     public String toString() {
-        return "Event{" +
+        return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", defaultProperties=" + defaultProperties +
