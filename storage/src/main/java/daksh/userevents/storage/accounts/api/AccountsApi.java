@@ -60,6 +60,7 @@ public class AccountsApi {
     }
 
     @Path(NetworkConstants.GET_ALL_ACCOUNTS)
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
     public Response getAllAccounts() {
         return Response.ok(DataSource.getInstance().getAllAccounts()).build();
@@ -69,13 +70,13 @@ public class AccountsApi {
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     public Response deleteAccount(@PathParam(NetworkConstants.ACCOUNT_ID) String accountId) {
-        //TODO drop the corresponding account's DB as well
         if (accountId == null || accountId.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         WriteResult writeResult = DataSource.getInstance().deleteAccount(accountId);
-        if (writeResult.wasAcknowledged()) {
+        if (writeResult.getN() > 0) {
+            DataSource.getInstance().deleteDatabase(accountId);
             return Response.status(Response.Status.NO_CONTENT).build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).build();

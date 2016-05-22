@@ -1,13 +1,17 @@
 package daksh.userevents.storage.accounts.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Property;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import daksh.userevents.storage.accounts.constants.DataConstants;
+import daksh.userevents.storage.common.ObjectIdJsonSerializer;
 
 /**
  * Created by daksh on 22-May-16.
@@ -19,10 +23,15 @@ public class Account {
 
     @Id
     @XmlElement
+    @JsonSerialize(using = ObjectIdJsonSerializer.class)
     private ObjectId id;
 
     @XmlElement
     private String name;
+
+    @XmlElement(name = DataConstants.AUTHORIZATION_TOKEN)
+    @Property(DataConstants.AUTHORIZATION_TOKEN)
+    private String authorizationToken;
 
     public Account() {
     }
@@ -43,11 +52,20 @@ public class Account {
         this.name = name;
     }
 
+    public String getAuthorizationToken() {
+        return authorizationToken;
+    }
+
+    public void setAuthorizationToken(String authorizationToken) {
+        this.authorizationToken = authorizationToken;
+    }
+
     @Override
     public String toString() {
         return "Account{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", authorizationToken='" + authorizationToken + '\'' +
                 '}';
     }
 }

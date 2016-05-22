@@ -1,5 +1,7 @@
 package daksh.userevents.storage.events.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -11,6 +13,7 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import daksh.userevents.storage.common.ObjectIdJsonSerializer;
 import daksh.userevents.storage.events.constants.DataConstants;
 
 /**
@@ -23,6 +26,7 @@ public class Event implements Serializable {
 
     @Id
     @XmlElement
+    @JsonSerialize(using = ObjectIdJsonSerializer.class)
     private ObjectId id;
 
     @XmlElement

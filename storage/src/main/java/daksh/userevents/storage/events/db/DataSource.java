@@ -16,9 +16,9 @@ public class DataSource {
 
     private static DataSource dataSource;
 
-    public static DataSource getInstance() {
+    public static DataSource getInstance(String accountId) {
         if (dataSource == null) {
-            dataSource = new DataSource("1");
+            dataSource = new DataSource(accountId);
         }
 
         return dataSource;

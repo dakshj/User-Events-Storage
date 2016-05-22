@@ -7,4 +7,5 @@ public class DataConstants {
 
     public static final String DB_NAME = "accounts";
     public static final String COLLECTION_NAME = "accounts";
+    public static final String AUTHORIZATION_TOKEN = "authorization_token";
 }
