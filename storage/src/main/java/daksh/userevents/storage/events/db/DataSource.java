@@ -29,7 +29,7 @@ public class DataSource {
     private DataSource(String accountId) {
         MongoClient mongoClient = new MongoClient("localhost");
         Morphia morphia = new Morphia();
-        morphia.mapPackage("daksh.userevents.storage.model", true);
+        morphia.mapPackage("daksh.userevents.storage.events.model", true);
 
         datastore = morphia.createDatastore(mongoClient, accountId);
         datastore.ensureIndexes();
