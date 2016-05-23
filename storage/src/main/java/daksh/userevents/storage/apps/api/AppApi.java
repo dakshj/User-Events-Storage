@@ -48,12 +48,12 @@ public class AppApi {
 
         final AppDao appDao = AppDao.getInstance(adminId);
 
-        if (appDao.appNameExists(appName)) {
+        if (appDao.exists(AppNetworkConstants.NAME, appName)) {
             return Response.status(Response.Status.CONFLICT)
                     .entity("App Name is already in use").build();
         }
 
-        ObjectId appId = appDao.createApp(appName);
+        ObjectId appId = appDao.create(new App(appName));
 
         if (appId == null) {
             return Response.serverError()
@@ -84,7 +84,7 @@ public class AppApi {
 
         ObjectId adminId = extractAdminId(requestContext);
 
-        App app = AppDao.getInstance(adminId).getApp(new ObjectId(appId));
+        App app = AppDao.getInstance(adminId).get(new ObjectId(appId));
 
         if (app == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -101,7 +101,7 @@ public class AppApi {
     public Response getAllApps(@Context ContainerRequestContext requestContext) {
         ObjectId adminId = extractAdminId(requestContext);
 
-        List<App> allApps = AppDao.getInstance(adminId).getAllApps();
+        List<App> allApps = AppDao.getInstance(adminId).getAll();
 
         if (allApps == null) {
             return Response.serverError().entity("Failed to fetch Apps").build();
@@ -139,7 +139,7 @@ public class AppApi {
                               @Context ContainerRequestContext requestContext) {
         ObjectId adminId = extractAdminId(requestContext);
 
-        WriteResult writeResult = AppDao.getInstance(adminId).deleteApp(new ObjectId(appId));
+        WriteResult writeResult = AppDao.getInstance(adminId).delete(new ObjectId(appId));
 
         if (writeResult.getN() == 0) {
             return Response.status(Response.Status.NOT_FOUND)

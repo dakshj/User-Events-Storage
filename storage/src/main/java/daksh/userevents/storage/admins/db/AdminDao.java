@@ -104,7 +104,7 @@ public class AdminDao {
     public WriteResult deleteAdmin(ObjectId adminId) {
         WriteResult writeResult = datastore.delete(Admin.class, adminId);
 
-        AppDao.getInstance(adminId).deleteAllApps();
+        AppDao.getInstance(adminId).deleteAll();
 
         return writeResult;
     }
@@ -152,7 +152,7 @@ public class AdminDao {
 
         //TODO replace the below with a Mongo Query!
         for (Key<Admin> adminKey : datastore.find(Admin.class).asKeyList()) {
-            for (App app : AppDao.getInstance((ObjectId) adminKey.getId()).getAllApps()) {
+            for (App app : AppDao.getInstance((ObjectId) adminKey.getId()).getAll()) {
                 if (app.getAppToken().equals(token)) {
                     final ObjectId appId = app.getId();
                     appTokenMap.put(token, appId);

@@ -1,117 +1,48 @@
 package daksh.userevents.storage.apps.db;
 
-import com.mongodb.MongoClient;
 import com.mongodb.WriteResult;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.AdvancedDatastore;
 import org.mongodb.morphia.Key;
-import org.mongodb.morphia.Morphia;
-import org.mongodb.morphia.mapping.Mapper;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.UpdateOperations;
-import org.mongodb.morphia.query.UpdateResults;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import daksh.userevents.storage.apps.constants.AppDataConstants;
-import daksh.userevents.storage.apps.constants.AppNetworkConstants;
 import daksh.userevents.storage.apps.model.App;
-import daksh.userevents.storage.common.constants.DataConstants;
+import daksh.userevents.storage.common.db.Dao;
 import daksh.userevents.storage.events.db.EventDao;
 
 /**
  * Created by daksh on 23-May-16.
  */
-public class AppDao {
-
-    private static Map<ObjectId, AppDao> appDaoMap;
+public class AppDao extends Dao<App> {
 
     public static AppDao getInstance(ObjectId adminId) {
-        if (appDaoMap == null) {
-            appDaoMap = new LinkedHashMap<ObjectId, AppDao>(
-                    DataConstants.LRU_MAX * 4 / 3, 0.75f, true
-            ) {
-                @Override
-                protected boolean removeEldestEntry(Map.Entry<ObjectId, AppDao> eldest) {
-                    return size() > DataConstants.LRU_MAX;
-                }
-            };
+        AppDao appDa = (AppDao) getFromMap(adminId);
+
+        if (appDa == null) {
+            appDa = new AppDao(adminId);
+            putIntoMap(adminId, appDa);
         }
 
-        if (appDaoMap.containsKey(adminId)) {
-            AppDao appDao = appDaoMap.get(adminId);
-            if (appDao != null) {
-                return appDao;
-            }
-        }
-
-        final AppDao appDao = new AppDao(adminId);
-        appDaoMap.put(adminId, appDao);
-
-        return appDao;
+        return appDa;
     }
-
-    private final AdvancedDatastore datastore;
-    private final ObjectId adminId;
 
     private AppDao(ObjectId adminId) {
-        //TODO need to make this server independent
-
-        this.adminId = adminId;
-        final MongoClient mongoClient = new MongoClient("localhost");
-        final Morphia morphia = new Morphia();
-        morphia.mapPackage(AppDataConstants.MODELS_PACKAGE, true);
-
-        datastore = (AdvancedDatastore) morphia
-                .createDatastore(mongoClient, AppDataConstants.DB_NAME);
-
-        datastore.ensureIndexes();
+        super(adminId, App.class);
     }
 
-    public ObjectId getAdminId() {
-        return adminId;
+    @Override
+    public String getModelsPackage() {
+        return AppDataConstants.MODELS_PACKAGE;
     }
 
-    public ObjectId createApp(String appName) {
-        App app = new App();
-        app.setName(appName);
-        app.setAdminId(adminId);
-
-        return (ObjectId) datastore.save(adminId.toString(), app).getId();
-    }
-
-    public boolean appNameExists(String appName) {
-        return datastore.createQuery(adminId.toString(), App.class)
-                .field(AppNetworkConstants.NAME).equal(appName)
-                .limit(1).countAll() > 0;
-    }
-
-    public App getApp(ObjectId appId) {
-        return datastore.get(adminId.toString(), App.class, appId);
-    }
-
-    public List<App> getAllApps() {
-        return datastore.find(adminId.toString(), App.class).asList();
-    }
-
-    public List<Key<App>> getAllAppKeys() {
-        return datastore.find(adminId.toString(), App.class).asKeyList();
-    }
-
-    private UpdateResults updateField(ObjectId appId, String field, String value) {
-        Query<App> query = datastore.createQuery(adminId.toString(), App.class)
-                .field(Mapper.ID_KEY).equal(appId);
-
-        UpdateOperations<App> ops = datastore.createUpdateOperations(App.class)
-                .set(field, value);
-
-        return datastore.update(query, ops);
+    @Override
+    public String getDbName() {
+        return AppDataConstants.DB_NAME;
     }
 
     public String regenerateAppToken(ObjectId appId) {
@@ -121,27 +52,27 @@ public class AppDao {
         return token;
     }
 
-    public WriteResult deleteApp(ObjectId appId) {
-        WriteResult writeResult = datastore.delete(adminId.toString(), App.class, appId);
-
-        deleteAllEventsUsers(appId);
-
+    @Override
+    public WriteResult delete(ObjectId objectId) {
+        WriteResult writeResult = super.delete(objectId);
+        deleteAllEventsUsers(objectId);
         return writeResult;
     }
 
-    public void deleteAllApps() {
-        List<Key<App>> allAppKeys = getAllAppKeys();
+    @Override
+    public void deleteAll() {
+        List<Key<App>> keys = getAllKeys();
 
-        datastore.getMongo().getDatabase(AppDataConstants.DB_NAME)
-                .getCollection(adminId.toString()).drop();
+        super.deleteAll();
 
-        for (Key<App> appKey : allAppKeys) {
-            deleteAllEventsUsers(((ObjectId) appKey.getId()));
+        for (Key<App> key : keys) {
+            deleteAllEventsUsers((ObjectId) key.getId());
         }
     }
 
-    public void deleteAllEventsUsers(ObjectId appId) {
-        EventDao.getInstance(appId).deleteAllEvents();
+    private void deleteAllEventsUsers(ObjectId appId) {
+        EventDao.getInstance(appId).deleteAll();
         //TODO delete all users for this app as well
+        //UserDao.getInstance(appId).deleteAll();
     }
 }

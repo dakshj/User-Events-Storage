@@ -43,7 +43,7 @@ public class EventApi {
 
         ObjectId appId = extractAppId(requestContext);
 
-        ObjectId eventId = EventDao.getInstance(appId).createEvent(event);
+        ObjectId eventId = EventDao.getInstance(appId).create(event);
 
         return Response.created(
                 URI.create(EventNetworkConstants.BASE_URL + "/" + eventId)
@@ -63,7 +63,7 @@ public class EventApi {
 
         ObjectId appId = extractAppId(requestContext);
 
-        Event event = EventDao.getInstance(appId).getEvent(new ObjectId(eventId));
+        Event event = EventDao.getInstance(appId).get(new ObjectId(eventId));
 
         if (event == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -80,7 +80,7 @@ public class EventApi {
     public Response getAllEvents(@Context ContainerRequestContext requestContext) {
         ObjectId appId = extractAppId(requestContext);
 
-        List<Event> allEvents = EventDao.getInstance(appId).getAllEvents();
+        List<Event> allEvents = EventDao.getInstance(appId).getAll();
 
         if (allEvents == null) {
             return Response.serverError().entity("Failed to fetch Apps").build();

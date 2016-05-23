@@ -12,7 +12,6 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 import daksh.userevents.storage.apps.constants.AppDataConstants;
 import daksh.userevents.storage.common.api.ObjectIdJsonSerializer;
 
@@ -29,11 +28,6 @@ public class App implements Serializable {
     @JsonSerialize(using = ObjectIdJsonSerializer.class)
     private ObjectId id;
 
-    @XmlElement(name = AdminNetworkConstants.ADMIN_ID)
-    @Property(AdminNetworkConstants.ADMIN_ID)
-    @JsonSerialize(using = ObjectIdJsonSerializer.class)
-    private ObjectId adminId;
-
     @XmlElement
     private String name;
 
@@ -44,20 +38,16 @@ public class App implements Serializable {
     public App() {
     }
 
+    public App(String name) {
+        this.name = name;
+    }
+
     public ObjectId getId() {
         return id;
     }
 
     public void setId(ObjectId id) {
         this.id = id;
-    }
-
-    public ObjectId getAdminId() {
-        return adminId;
-    }
-
-    public void setAdminId(ObjectId adminId) {
-        this.adminId = adminId;
     }
 
     public String getName() {
@@ -80,7 +70,6 @@ public class App implements Serializable {
     public String toString() {
         return "App{" +
                 "id=" + id +
-                ", adminId=" + adminId +
                 ", name='" + name + '\'' +
                 ", appToken='" + appToken + '\'' +
                 '}';
