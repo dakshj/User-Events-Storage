@@ -3,7 +3,7 @@ package daksh.userevents.storage.events.db;
 import com.mongodb.MongoClient;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.AdvancedDatastore;
 import org.mongodb.morphia.Morphia;
 
 import java.util.LinkedHashMap;
@@ -45,7 +45,7 @@ public class EventDao {
         return eventDao;
     }
 
-    private final Datastore datastore;
+    private final AdvancedDatastore datastore;
     private final ObjectId appId;
 
     private EventDao(ObjectId appId) {
@@ -56,15 +56,15 @@ public class EventDao {
         final Morphia morphia = new Morphia();
         morphia.mapPackage(EventDataConstants.MODELS_PACKAGE, true);
 
-        datastore = morphia.createDatastore(mongoClient, appId.toString());
+        datastore = (AdvancedDatastore) morphia.createDatastore(mongoClient, appId.toString());
         datastore.ensureIndexes();
     }
 
     public ObjectId createEvent(Event event) {
-        return (ObjectId) datastore.save(event).getId();
+        return (ObjectId) datastore.save(appId.toString(), event).getId();
     }
 
     public Event getEvent(ObjectId eventId) {
-        return datastore.get(Event.class, eventId);
+        return datastore.get(appId.toString(), Event.class, eventId);
     }
 }

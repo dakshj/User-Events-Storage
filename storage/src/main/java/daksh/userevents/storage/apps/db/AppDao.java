@@ -4,7 +4,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.WriteResult;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.AdvancedDatastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.query.Query;
@@ -55,7 +55,7 @@ public class AppDao {
         return appDao;
     }
 
-    private final Datastore datastore;
+    private final AdvancedDatastore datastore;
     private final ObjectId adminId;
 
     private AppDao(ObjectId adminId) {
@@ -66,7 +66,9 @@ public class AppDao {
         final Morphia morphia = new Morphia();
         morphia.mapPackage(AppDataConstants.MODELS_PACKAGE, true);
 
-        datastore = morphia.createDatastore(mongoClient, AppDataConstants.DB_NAME);
+        datastore = (AdvancedDatastore) morphia
+                .createDatastore(mongoClient, AppDataConstants.DB_NAME);
+
         datastore.ensureIndexes();
     }
 
@@ -79,24 +81,25 @@ public class AppDao {
         app.setName(appName);
         app.setAdminId(adminId);
 
-        return (ObjectId) datastore.save(app).getId();
+        return (ObjectId) datastore.save(adminId.toString(), app).getId();
     }
 
     public boolean appNameExists(String appname) {
-        return datastore.find(App.class, AppNetworkConstants.APP_NAME, appname)
+        return datastore.createQuery(adminId.toString(), App.class)
+                .field(AppNetworkConstants.APP_NAME).equal(appname)
                 .limit(1).countAll() > 0;
     }
 
     public App getApp(ObjectId appId) {
-        return datastore.get(App.class, appId);
+        return datastore.get(adminId.toString(), App.class, appId);
     }
 
     public List<App> getAllApps() {
-        return datastore.find(App.class).asList();
+        return datastore.find(adminId.toString(), App.class).asList();
     }
 
     private UpdateResults updateField(ObjectId appId, String field, String value) {
-        Query<App> query = datastore.createQuery(App.class)
+        Query<App> query = datastore.createQuery(adminId.toString(), App.class)
                 .field(Mapper.ID_KEY).equal(appId);
 
         UpdateOperations<App> ops = datastore.createUpdateOperations(App.class)
@@ -113,7 +116,7 @@ public class AppDao {
     }
 
     public WriteResult deleteApp(ObjectId appId) {
-        WriteResult writeResult = datastore.delete(App.class, appId);
+        WriteResult writeResult = datastore.delete(adminId.toString(), App.class, appId);
 
         //TODO delete all events and users beloing to those deleted apps
 
