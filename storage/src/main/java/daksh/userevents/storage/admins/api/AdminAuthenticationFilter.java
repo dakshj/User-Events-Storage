@@ -1,4 +1,4 @@
-package daksh.userevents.storage.events.api;
+package daksh.userevents.storage.admins.api;
 
 import java.io.IOException;
 
@@ -11,18 +11,17 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
-import daksh.userevents.storage.accounts.constants.NetworkConstants;
-import daksh.userevents.storage.accounts.db.DataSource;
-import daksh.userevents.storage.common.Secured;
+import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
+import daksh.userevents.storage.admins.db.AdminDao;
 
 /**
  * Created by daksh on 22-May-16.
  */
 
-@Secured
+@AdminSecured
 @Provider
 @Priority(Priorities.AUTHENTICATION)
-public class AuthenticationFilter implements ContainerRequestFilter {
+public class AdminAuthenticationFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -35,14 +34,15 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         String token = authorizationHeader.substring("Bearer".length()).trim();
 
         try {
-            requestContext.setProperty(NetworkConstants.ACCOUNT_ID,
-                    getAccountIdFromAuthorizationToken(token));
+            requestContext.setProperty(AdminNetworkConstants.ADMIN_ID,
+                    getAdminIdFromAuthorizationToken(token));
         } catch (NotAuthorizedException e) {
-            requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+            requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(e.getMessage()).build());
         }
     }
 
-    private String getAccountIdFromAuthorizationToken(String token) throws NotAuthorizedException {
-        return DataSource.getInstance().getAccountIdFromAuthorizationToken(token);
+    private String getAdminIdFromAuthorizationToken(String token) throws NotAuthorizedException {
+        return AdminDao.getInstance().getAdminIdFromAuthorizationToken(token);
     }
 }

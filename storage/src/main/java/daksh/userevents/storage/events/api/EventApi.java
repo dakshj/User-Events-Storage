@@ -1,6 +1,6 @@
 package daksh.userevents.storage.events.api;
 
-import org.mongodb.morphia.Key;
+import org.bson.types.ObjectId;
 
 import java.net.URI;
 
@@ -15,60 +15,63 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import daksh.userevents.storage.common.Secured;
-import daksh.userevents.storage.events.constants.NetworkConstants;
-import daksh.userevents.storage.events.db.DataSource;
+import daksh.userevents.storage.apps.api.AppSecured;
+import daksh.userevents.storage.apps.constants.AppNetworkConstants;
+import daksh.userevents.storage.events.constants.EventNetworkConstants;
+import daksh.userevents.storage.events.db.EventDao;
 import daksh.userevents.storage.events.model.Event;
-
-import static daksh.userevents.storage.accounts.constants.NetworkConstants.ACCOUNT_ID;
 
 /**
  * Created by daksh on 22-May-16.
  */
 
-@Path(NetworkConstants.BASE_URL)
-public class EventsApi {
+@Path(EventNetworkConstants.BASE_URL)
+public class EventApi {
 
-    @Secured
-    @Path(NetworkConstants.CREATE_EVENT)
+    @AppSecured
+    @Path(EventNetworkConstants.CREATE_EVENT)
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createEvent(Event event,
-                                @Context ContainerRequestContext requestContext) {
+    public Response createEvent(Event event, @Context ContainerRequestContext requestContext) {
         if (event == null ||
                 event.getName() == null || event.getName().isEmpty() ||
                 event.getDefaultProperties() == null || event.getDefaultProperties().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        Key<Event> key = DataSource
-                .getInstance((String) requestContext.getProperty(ACCOUNT_ID))
-                .createEvent(event);
+        ObjectId appId = extractAppId(requestContext);
+
+        ObjectId eventId = EventDao.getInstance(appId).createEvent(event);
 
         return Response.created(
-                URI.create(NetworkConstants.BASE_URL + "/" + key.getId().toString())
+                URI.create(EventNetworkConstants.BASE_URL + "/" + eventId)
         ).build();
     }
 
-    @Secured
-    @Path(NetworkConstants.GET_EVENT)
+    @AppSecured
+    @Path(EventNetworkConstants.GET_EVENT)
     @GET
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getEvent(@PathParam(NetworkConstants.EVENT_ID) String eventId,
+    public Response getEvent(@PathParam(EventNetworkConstants.EVENT_ID) String eventId,
                              @Context ContainerRequestContext requestContext) {
         if (eventId == null || eventId.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        Event event = DataSource
-                .getInstance((String) requestContext.getProperty(ACCOUNT_ID))
-                .getEvent(eventId);
+        ObjectId appId = extractAppId(requestContext);
+
+        Event event = EventDao.getInstance(appId).getEvent(new ObjectId(eventId));
 
         if (event == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         return Response.ok(event).build();
+    }
+
+    private static ObjectId extractAppId(ContainerRequestContext requestContext) {
+        return new ObjectId((String) requestContext.getProperty(AppNetworkConstants.APP_ID));
     }
 }

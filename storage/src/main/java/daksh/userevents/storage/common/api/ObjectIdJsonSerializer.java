@@ -1,4 +1,4 @@
-package daksh.userevents.storage.common;
+package daksh.userevents.storage.common.api;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;

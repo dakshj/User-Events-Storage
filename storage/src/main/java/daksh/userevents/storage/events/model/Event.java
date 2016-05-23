@@ -13,15 +13,17 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import daksh.userevents.storage.common.ObjectIdJsonSerializer;
-import daksh.userevents.storage.events.constants.DataConstants;
+import daksh.userevents.storage.apps.constants.AppNetworkConstants;
+import daksh.userevents.storage.common.api.ObjectIdJsonSerializer;
+import daksh.userevents.storage.events.constants.EventDataConstants;
+import daksh.userevents.storage.users.constants.UserNetworkConstants;
 
 /**
  * Created by daksh on 22-May-16.
  */
 
 @XmlRootElement
-@Entity(DataConstants.COLLECTION_NAME)
+@Entity(EventDataConstants.COLLECTION_NAME)
 public class Event implements Serializable {
 
     @Id
@@ -32,12 +34,22 @@ public class Event implements Serializable {
     @XmlElement
     private String name;
 
-    @XmlElement(name = DataConstants.DEFAULT_PROPERTIES)
-    @Property(DataConstants.DEFAULT_PROPERTIES)
+    @XmlElement(name = AppNetworkConstants.APP_ID)
+    @Property(AppNetworkConstants.APP_ID)
+    @JsonSerialize(using = ObjectIdJsonSerializer.class)
+    private ObjectId appId;
+
+    @XmlElement(name = UserNetworkConstants.USER_ID)
+    @Property(UserNetworkConstants.USER_ID)
+    @JsonSerialize(using = ObjectIdJsonSerializer.class)
+    private ObjectId userId;
+
+    @XmlElement(name = EventDataConstants.DEFAULT_PROPERTIES)
+    @Property(EventDataConstants.DEFAULT_PROPERTIES)
     private Map<String, String> defaultProperties;
 
-    @XmlElement(name = DataConstants.USER_PROPERTIES)
-    @Property(DataConstants.USER_PROPERTIES)
+    @XmlElement(name = EventDataConstants.USER_PROPERTIES)
+    @Property(EventDataConstants.USER_PROPERTIES)
     private Map<String, String> userProperties;
 
     public Event() {
@@ -57,6 +69,22 @@ public class Event implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public ObjectId getAppId() {
+        return appId;
+    }
+
+    public void setAppId(ObjectId appId) {
+        this.appId = appId;
+    }
+
+    public ObjectId getUserId() {
+        return userId;
+    }
+
+    public void setUserId(ObjectId userId) {
+        this.userId = userId;
     }
 
     public Map<String, String> getDefaultProperties() {
@@ -80,6 +108,8 @@ public class Event implements Serializable {
         return "Event{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", appId=" + appId +
+                ", userId=" + userId +
                 ", defaultProperties=" + defaultProperties +
                 ", userProperties=" + userProperties +
                 '}';

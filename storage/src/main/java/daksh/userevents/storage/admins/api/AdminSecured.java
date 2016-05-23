@@ -1,4 +1,4 @@
-package daksh.userevents.storage.common;
+package daksh.userevents.storage.admins.api;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -15,5 +15,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @NameBinding
 @Retention(RUNTIME)
 @Target({TYPE, METHOD})
-public @interface Secured {
+public @interface AdminSecured {
 }
