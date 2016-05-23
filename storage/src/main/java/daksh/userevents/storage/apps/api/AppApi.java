@@ -38,7 +38,7 @@ public class AppApi {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createApp(@FormParam(AppNetworkConstants.APP_NAME) String appName,
+    public Response createApp(@FormParam(AppNetworkConstants.NAME) String appName,
                               @Context ContainerRequestContext requestContext) {
         if (appName == null || appName.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -104,11 +104,10 @@ public class AppApi {
         List<App> allApps = AppDao.getInstance(adminId).getAllApps();
 
         if (allApps == null) {
-            return Response.serverError()
-                    .entity("Failed to fetch Apps").build();
+            return Response.serverError().entity("Failed to fetch Apps").build();
         }
 
-        return Response.ok(AppDao.getInstance(adminId).getAllApps()).build();
+        return Response.ok(allApps).build();
     }
 
     @AdminSecured
@@ -140,9 +139,7 @@ public class AppApi {
                               @Context ContainerRequestContext requestContext) {
         ObjectId adminId = extractAdminId(requestContext);
 
-        final AppDao appDao = AppDao.getInstance(adminId);
-
-        WriteResult writeResult = appDao.deleteApp(new ObjectId(appId));
+        WriteResult writeResult = AppDao.getInstance(adminId).deleteApp(new ObjectId(appId));
 
         if (writeResult.getN() == 0) {
             return Response.status(Response.Status.NOT_FOUND)

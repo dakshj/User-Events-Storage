@@ -7,9 +7,10 @@ import org.mongodb.morphia.AdvancedDatastore;
 import org.mongodb.morphia.Morphia;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import daksh.userevents.storage.common.constants.CommonDataConstants;
+import daksh.userevents.storage.common.constants.DataConstants;
 import daksh.userevents.storage.events.constants.EventDataConstants;
 import daksh.userevents.storage.events.model.Event;
 
@@ -23,11 +24,11 @@ public class EventDao {
     public static EventDao getInstance(ObjectId appId) {
         if (eventDaoMap == null) {
             eventDaoMap = new LinkedHashMap<ObjectId, EventDao>(
-                    CommonDataConstants.LRU_MAX * 4 / 3, 0.75f, true
+                    DataConstants.LRU_MAX * 4 / 3, 0.75f, true
             ) {
                 @Override
                 protected boolean removeEldestEntry(Map.Entry<ObjectId, EventDao> eldest) {
-                    return size() > CommonDataConstants.LRU_MAX;
+                    return size() > DataConstants.LRU_MAX;
                 }
             };
         }
@@ -56,7 +57,9 @@ public class EventDao {
         final Morphia morphia = new Morphia();
         morphia.mapPackage(EventDataConstants.MODELS_PACKAGE, true);
 
-        datastore = (AdvancedDatastore) morphia.createDatastore(mongoClient, appId.toString());
+        datastore = (AdvancedDatastore) morphia
+                .createDatastore(mongoClient, EventDataConstants.DB_NAME);
+
         datastore.ensureIndexes();
     }
 
@@ -66,5 +69,14 @@ public class EventDao {
 
     public Event getEvent(ObjectId eventId) {
         return datastore.get(appId.toString(), Event.class, eventId);
+    }
+
+    public List<Event> getAllEvents() {
+        return datastore.find(appId.toString(), Event.class).asList();
+    }
+
+    public void deleteAllEvents() {
+        datastore.getMongo().getDatabase(EventDataConstants.DB_NAME)
+                .getCollection(appId.toString()).drop();
     }
 }

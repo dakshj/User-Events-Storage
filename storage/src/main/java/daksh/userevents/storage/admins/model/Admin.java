@@ -21,7 +21,7 @@ import daksh.userevents.storage.common.api.ObjectIdJsonSerializer;
 
 @XmlRootElement
 @Entity(AdminDataConstants.COLLECTION_NAME)
-public class Admin implements Serializable{
+public class Admin implements Serializable {
 
     @Id
     @XmlElement

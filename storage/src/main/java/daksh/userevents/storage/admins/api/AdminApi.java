@@ -7,16 +7,18 @@ import org.bson.types.ObjectId;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 import daksh.userevents.storage.admins.db.AdminDao;
+import daksh.userevents.storage.common.api.AuthenticationFilter;
 
 /**
  * Created by daksh on 22-May-16.
@@ -40,14 +42,14 @@ public class AdminApi {
 
         if (AdminDao.getInstance().usernameExists(username)) {
             return Response.status(Response.Status.CONFLICT)
-                    .entity("Username is already in use").build();
+                    .entity("Username is already in use")
+                    .location(AdminNetworkConstants.getLoginURI()).build();
         }
 
         ObjectId adminId = AdminDao.getInstance().createAdmin(username, password);
 
         if (adminId == null) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("Username or password is wrong").build();
+            return Response.serverError().entity("Failed to create Admin").build();
         }
 
         String authorizationToken = AdminDao.getInstance().regenerateAuthorizationToken(adminId);
@@ -74,7 +76,8 @@ public class AdminApi {
 
         if (adminId == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("Username or password is wrong").build();
+                    .entity("Username or password is wrong")
+                    .location(AdminNetworkConstants.getLoginURI()).build();
         }
 
         String authorizationToken = AdminDao.getInstance().regenerateAuthorizationToken(adminId);
@@ -86,19 +89,20 @@ public class AdminApi {
         return Response.ok(authorizationToken).build();
     }
 
-    @AdminSecured
     @Path(AdminNetworkConstants.LOG_OUT_ADMIN)
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response logOutAdmin(@Context ContainerRequestContext requestContext) {
-        String adminId = (String) requestContext.getProperty(AdminNetworkConstants.ADMIN_ID);
-
-        if (AdminDao.getInstance().logOutAdmin(new ObjectId(adminId))) {
-            return Response.status(Response.Status.SEE_OTHER).build();
+    public Response logOutAdmin(@HeaderParam(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        try {
+            String token = AuthenticationFilter.getToken(authorizationHeader);
+            ObjectId adminId = new ObjectId(AdminDao.getInstance()
+                    .getAdminIdFromAuthorizationToken(token));
+            AdminDao.getInstance().logOutAdmin(adminId);
+        } catch (NotAuthorizedException ignored) {
         }
 
-        return Response.serverError().build();
+        return Response.seeOther(AdminNetworkConstants.getLoginURI()).build();
     }
 
     @Path(AdminNetworkConstants.DELETE_ADMIN)
@@ -116,7 +120,8 @@ public class AdminApi {
 
         if (adminId == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("Username or password is wrong").build();
+                    .entity("Username or password is wrong")
+                    .location(AdminNetworkConstants.getLoginURI()).build();
         }
 
         WriteResult writeResult = AdminDao.getInstance().deleteAdmin(adminId);

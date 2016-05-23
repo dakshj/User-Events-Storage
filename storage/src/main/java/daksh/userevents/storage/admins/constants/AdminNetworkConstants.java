@@ -1,5 +1,7 @@
 package daksh.userevents.storage.admins.constants;
 
+import java.net.URI;
+
 /**
  * Created by daksh on 22-May-16.
  */
@@ -19,4 +21,9 @@ public final class AdminNetworkConstants {
     public static final String ADMIN_ID = "admin_id";
 
     public static final String DELETE_ADMIN = "/";
+
+    public static URI getLoginURI() {
+        return URI.create(AdminNetworkConstants.BASE_URL
+                + AdminNetworkConstants.AUTHENTICATE_ADMIN);
+    }
 }

@@ -21,7 +21,7 @@ import daksh.userevents.storage.common.api.ObjectIdJsonSerializer;
  */
 
 @XmlRootElement
-@Entity(AppDataConstants.COLLECTION_NAME)
+@Entity
 public class App implements Serializable {
 
     @Id

@@ -25,7 +25,7 @@ import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 import daksh.userevents.storage.admins.model.Admin;
 import daksh.userevents.storage.apps.db.AppDao;
 import daksh.userevents.storage.apps.model.App;
-import daksh.userevents.storage.common.constants.CommonDataConstants;
+import daksh.userevents.storage.common.constants.DataConstants;
 import daksh.userevents.storage.common.security.PasswordAuthentication;
 
 /**
@@ -104,7 +104,7 @@ public class AdminDao {
     public WriteResult deleteAdmin(ObjectId adminId) {
         WriteResult writeResult = datastore.delete(Admin.class, adminId);
 
-        //TODO delete all apps belonging to this admin
+        AppDao.getInstance(adminId).deleteAllApps();
 
         return writeResult;
     }
@@ -134,11 +134,11 @@ public class AdminDao {
 
         if (appTokenMap == null) {
             appTokenMap = new LinkedHashMap<String, ObjectId>(
-                    CommonDataConstants.LRU_MAX * 4 / 3, 0.75f, true
+                    DataConstants.LRU_MAX * 4 / 3, 0.75f, true
             ) {
                 @Override
                 protected boolean removeEldestEntry(Map.Entry<String, ObjectId> eldest) {
-                    return size() > CommonDataConstants.LRU_MAX;
+                    return size() > DataConstants.LRU_MAX;
                 }
             };
         }
@@ -150,6 +150,7 @@ public class AdminDao {
             }
         }
 
+        //TODO replace the below with a Mongo Query!
         for (Key<Admin> adminKey : datastore.find(Admin.class).asKeyList()) {
             for (App app : AppDao.getInstance((ObjectId) adminKey.getId()).getAllApps()) {
                 if (app.getAppToken().equals(token)) {

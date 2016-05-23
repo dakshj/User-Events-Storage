@@ -13,7 +13,6 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import daksh.userevents.storage.apps.constants.AppNetworkConstants;
 import daksh.userevents.storage.common.api.ObjectIdJsonSerializer;
 import daksh.userevents.storage.events.constants.EventDataConstants;
 import daksh.userevents.storage.users.constants.UserNetworkConstants;
@@ -23,7 +22,7 @@ import daksh.userevents.storage.users.constants.UserNetworkConstants;
  */
 
 @XmlRootElement
-@Entity(EventDataConstants.COLLECTION_NAME)
+@Entity
 public class Event implements Serializable {
 
     @Id
@@ -33,11 +32,6 @@ public class Event implements Serializable {
 
     @XmlElement
     private String name;
-
-    @XmlElement(name = AppNetworkConstants.APP_ID)
-    @Property(AppNetworkConstants.APP_ID)
-    @JsonSerialize(using = ObjectIdJsonSerializer.class)
-    private ObjectId appId;
 
     @XmlElement(name = UserNetworkConstants.USER_ID)
     @Property(UserNetworkConstants.USER_ID)
@@ -71,14 +65,6 @@ public class Event implements Serializable {
         this.name = name;
     }
 
-    public ObjectId getAppId() {
-        return appId;
-    }
-
-    public void setAppId(ObjectId appId) {
-        this.appId = appId;
-    }
-
     public ObjectId getUserId() {
         return userId;
     }
@@ -108,7 +94,6 @@ public class Event implements Serializable {
         return "Event{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", appId=" + appId +
                 ", userId=" + userId +
                 ", defaultProperties=" + defaultProperties +
                 ", userProperties=" + userProperties +

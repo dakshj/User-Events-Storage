@@ -3,6 +3,7 @@ package daksh.userevents.storage.events.api;
 import org.bson.types.ObjectId;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -69,6 +70,23 @@ public class EventApi {
         }
 
         return Response.ok(event).build();
+    }
+
+    @AppSecured
+    @Path(EventNetworkConstants.GET_ALL_EVENTS)
+    @GET
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllEvents(@Context ContainerRequestContext requestContext) {
+        ObjectId appId = extractAppId(requestContext);
+
+        List<Event> allEvents = EventDao.getInstance(appId).getAllEvents();
+
+        if (allEvents == null) {
+            return Response.serverError().entity("Failed to fetch Apps").build();
+        }
+
+        return Response.ok(allEvents).build();
     }
 
     private static ObjectId extractAppId(ContainerRequestContext requestContext) {
