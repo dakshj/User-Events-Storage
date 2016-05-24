@@ -46,7 +46,7 @@ public class AdminApi {
                     .location(AdminNetworkConstants.getLoginURI()).build();
         }
 
-        ObjectId adminId = AdminDao.getInstance().createAdmin(username, password);
+        ObjectId adminId = AdminDao.getInstance().createAdmin(username, password, name);
 
         if (adminId == null) {
             return Response.serverError().entity("Failed to create Admin").build();

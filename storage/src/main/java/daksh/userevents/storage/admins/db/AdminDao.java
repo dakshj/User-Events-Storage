@@ -55,10 +55,11 @@ public class AdminDao {
         datastore.ensureIndexes();
     }
 
-    public ObjectId createAdmin(String username, String password) {
+    public ObjectId createAdmin(String username, String password, String name) {
         Admin admin = new Admin();
         admin.setUsername(username);
         admin.setPasswordHashed(new PasswordAuthentication().hash(password.toCharArray()));
+        admin.setName(name);
         return (ObjectId) datastore.save(admin).getId();
     }
 
