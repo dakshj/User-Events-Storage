@@ -14,8 +14,6 @@ import org.mongodb.morphia.query.UpdateResults;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Random;
 
 import javax.ws.rs.NotAuthorizedException;
@@ -25,8 +23,8 @@ import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 import daksh.userevents.storage.admins.model.Admin;
 import daksh.userevents.storage.apps.db.AppDao;
 import daksh.userevents.storage.apps.model.App;
-import daksh.userevents.storage.common.constants.DataConstants;
 import daksh.userevents.storage.common.security.PasswordAuthentication;
+import daksh.userevents.storage.common.util.LruCache;
 
 /**
  * Created by daksh on 22-May-16.
@@ -128,24 +126,17 @@ public class AdminDao {
         return query.iterator().next().getId().toString();
     }
 
-    private static Map<String, ObjectId> appTokenMap;
+    private static LruCache<String, ObjectId> cache;
 
     public ObjectId getAppIdFromAuthorizationToken(String token) throws NotAuthorizedException {
         //TODO Need to reduce the complexity of this!
 
-        if (appTokenMap == null) {
-            appTokenMap = new LinkedHashMap<String, ObjectId>(
-                    DataConstants.LRU_MAX * 4 / 3, 0.75f, true
-            ) {
-                @Override
-                protected boolean removeEldestEntry(Map.Entry<String, ObjectId> eldest) {
-                    return size() > DataConstants.LRU_MAX;
-                }
-            };
+        if (cache == null) {
+            cache = new LruCache<>();
         }
 
-        if (appTokenMap.containsKey(token)) {
-            ObjectId appId = appTokenMap.get(token);
+        if (cache.getMap().containsKey(token)) {
+            ObjectId appId = cache.get(token);
             if (appId != null) {
                 return appId;
             }
@@ -156,7 +147,7 @@ public class AdminDao {
             for (App app : AppDao.getInstance((ObjectId) adminKey.getId()).getAll()) {
                 if (app.getAppToken().equals(token)) {
                     final ObjectId appId = app.getId();
-                    appTokenMap.put(token, appId);
+                    cache.put(token, appId);
                     return appId;
                 }
             }
@@ -173,5 +164,11 @@ public class AdminDao {
     public boolean logOutAdmin(ObjectId adminId) {
         UpdateResults updateResults = removeField(adminId, AdminDataConstants.AUTHORIZATION_TOKEN);
         return updateResults.getWriteResult().getN() > 0;
+    }
+
+    public void removeAppToken(ObjectId appId) {
+        if (cache != null && !cache.getMap().isEmpty() && cache.getMap().containsValue(appId)) {
+            cache.removeByValue(appId);
+        }
     }
 }

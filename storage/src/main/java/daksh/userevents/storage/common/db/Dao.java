@@ -2,6 +2,7 @@ package daksh.userevents.storage.common.db;
 
 import com.mongodb.MongoClient;
 import com.mongodb.WriteResult;
+import com.sun.istack.internal.Nullable;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.AdvancedDatastore;
@@ -12,47 +13,32 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import daksh.userevents.storage.common.constants.DataConstants;
+import daksh.userevents.storage.common.util.LruCache;
 
 /**
  * Created by daksh on 24-May-16.
  */
 public abstract class Dao<T> {
 
-    private static Map<ObjectId, Dao> daoMap;
+    private static LruCache<ObjectId, Dao> cache;
 
+    @Nullable
     protected static Dao getFromMap(ObjectId adminId) {
-        if (daoMap == null) {
-            daoMap = new LinkedHashMap<ObjectId, Dao>(
-                    DataConstants.LRU_MAX * 4 / 3, 0.75f, true
-            ) {
-                @Override
-                protected boolean removeEldestEntry(Map.Entry<ObjectId, Dao> eldest) {
-                    return size() > DataConstants.LRU_MAX;
-                }
-            };
+        if (cache == null) {
+            cache = new LruCache<>();
         }
 
-        if (daoMap.containsKey(adminId)) {
-            Dao dao = daoMap.get(adminId);
-            if (dao != null) {
-                return dao;
-            }
-        }
-
-        return null;
+        return cache.get(adminId);
     }
 
-    protected static void putIntoMap(ObjectId adminId, Dao dao) {
-        if (daoMap == null) {
-            daoMap = new LinkedHashMap<>();
+    protected static void putIntoMap(ObjectId objectId, Dao dao) {
+        if (cache == null) {
+            cache = new LruCache<>();
         }
 
-        daoMap.put(adminId, dao);
+        cache.put(objectId, dao);
     }
 
     private final AdvancedDatastore datastore;

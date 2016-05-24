@@ -10,6 +10,7 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
 
+import daksh.userevents.storage.admins.db.AdminDao;
 import daksh.userevents.storage.apps.constants.AppDataConstants;
 import daksh.userevents.storage.apps.model.App;
 import daksh.userevents.storage.common.db.Dao;
@@ -46,6 +47,8 @@ public class AppDao extends Dao<App> {
     }
 
     public String regenerateAppToken(ObjectId appId) {
+        AdminDao.getInstance().removeAppToken(appId);
+
         Random random = new SecureRandom();
         String token = new BigInteger(130, random).toString(32);
         updateField(appId, AppDataConstants.APP_TOKEN, token);
