@@ -24,7 +24,9 @@ public class AdminAuthenticationFilter extends AuthenticationFilter implements C
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
+        System.out.println("AdminAuthenticationFilter 1");
         handleAuthentication(requestContext, AdminNetworkConstants.ADMIN_ID, true);
+        System.out.println("AdminAuthenticationFilter 2");
     }
 
     @Override

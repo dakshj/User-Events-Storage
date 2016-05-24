@@ -128,7 +128,7 @@ public class AdminDao {
 
     private static LruCache<String, ObjectId> cache;
 
-    public ObjectId getAppIdFromAuthorizationToken(String token) throws NotAuthorizedException {
+    public String getAppIdFromAuthorizationToken(String token) throws NotAuthorizedException {
         //TODO Need to reduce the complexity of this!
 
         if (cache == null) {
@@ -138,7 +138,7 @@ public class AdminDao {
         if (cache.getMap().containsKey(token)) {
             ObjectId appId = cache.get(token);
             if (appId != null) {
-                return appId;
+                return appId.toString();
             }
         }
 
@@ -148,7 +148,7 @@ public class AdminDao {
                 if (app.getAppToken().equals(token)) {
                     final ObjectId appId = app.getId();
                     cache.put(token, appId);
-                    return appId;
+                    return appId.toString();
                 }
             }
         }
