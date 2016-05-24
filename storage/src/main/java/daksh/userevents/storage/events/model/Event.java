@@ -4,16 +4,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Property;
 
-import java.io.Serializable;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import daksh.userevents.storage.common.api.ObjectIdJsonSerializer;
+import daksh.userevents.storage.common.model.Model;
 import daksh.userevents.storage.events.constants.EventDataConstants;
 import daksh.userevents.storage.users.constants.UserNetworkConstants;
 
@@ -23,15 +22,7 @@ import daksh.userevents.storage.users.constants.UserNetworkConstants;
 
 @XmlRootElement
 @Entity
-public class Event implements Serializable {
-
-    @Id
-    @XmlElement
-    @JsonSerialize(using = ObjectIdJsonSerializer.class)
-    private ObjectId id;
-
-    @XmlElement
-    private String name;
+public class Event extends Model {
 
     @XmlElement(name = UserNetworkConstants.USER_ID)
     @Property(UserNetworkConstants.USER_ID)
@@ -47,22 +38,6 @@ public class Event implements Serializable {
     private Map<String, String> userProperties;
 
     public Event() {
-    }
-
-    public ObjectId getId() {
-        return id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public ObjectId getUserId() {
@@ -87,16 +62,5 @@ public class Event implements Serializable {
 
     public void setUserProperties(Map<String, String> userProperties) {
         this.userProperties = userProperties;
-    }
-
-    @Override
-    public String toString() {
-        return "Event{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", userId=" + userId +
-                ", defaultProperties=" + defaultProperties +
-                ", userProperties=" + userProperties +
-                '}';
     }
 }

@@ -1,19 +1,14 @@
 package daksh.userevents.storage.users.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Property;
 
-import java.io.Serializable;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import daksh.userevents.storage.common.api.ObjectIdJsonSerializer;
+import daksh.userevents.storage.common.model.Model;
 import daksh.userevents.storage.users.constants.UserDataConstants;
 
 /**
@@ -22,15 +17,7 @@ import daksh.userevents.storage.users.constants.UserDataConstants;
 
 @XmlRootElement
 @Entity
-public class User implements Serializable {
-
-    @Id
-    @XmlElement
-    @JsonSerialize(using = ObjectIdJsonSerializer.class)
-    private ObjectId id;
-
-    @XmlElement
-    private String name;
+public class User extends Model {
 
     @XmlElement(name = UserDataConstants.DEFAULT_PROPERTIES)
     @Property(UserDataConstants.DEFAULT_PROPERTIES)
@@ -41,22 +28,6 @@ public class User implements Serializable {
     private Map<String, String> userProperties;
 
     public User() {
-    }
-
-    public ObjectId getId() {
-        return id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Map<String, String> getDefaultProperties() {
@@ -73,15 +44,5 @@ public class User implements Serializable {
 
     public void setUserProperties(Map<String, String> userProperties) {
         this.userProperties = userProperties;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", defaultProperties=" + defaultProperties +
-                ", userProperties=" + userProperties +
-                '}';
     }
 }
