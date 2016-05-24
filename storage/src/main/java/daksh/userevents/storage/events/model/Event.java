@@ -21,7 +21,7 @@ import daksh.userevents.storage.users.constants.UserNetworkConstants;
  */
 
 @XmlRootElement
-@Entity
+@Entity(noClassnameStored = true)
 public class Event extends Model {
 
     @XmlElement(name = UserNetworkConstants.USER_ID)

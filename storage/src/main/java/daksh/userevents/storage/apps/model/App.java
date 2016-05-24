@@ -14,7 +14,7 @@ import daksh.userevents.storage.common.model.Model;
  */
 
 @XmlRootElement
-@Entity
+@Entity(noClassnameStored = true)
 public class App extends Model {
 
     @XmlElement(name = AppDataConstants.APP_TOKEN)

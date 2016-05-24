@@ -16,7 +16,7 @@ import daksh.userevents.storage.users.constants.UserDataConstants;
  */
 
 @XmlRootElement
-@Entity
+@Entity(noClassnameStored = true)
 public class User extends Model {
 
     @XmlElement(name = UserDataConstants.DEFAULT_PROPERTIES)
