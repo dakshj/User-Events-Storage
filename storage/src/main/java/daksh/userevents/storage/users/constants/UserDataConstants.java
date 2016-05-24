@@ -5,7 +5,8 @@ package daksh.userevents.storage.users.constants;
  */
 public final class UserDataConstants {
 
+    public static final String MODELS_PACKAGE = "daksh.userevents.storage.users.model";
     public static final String DB_NAME = "users";
-    public static final String DEFAULT_PROPERTIES = "default_properties";
     public static final String USER_PROPERTIES = "user_properties";
+    public static final String DEFAULT_PROPERTIES = "default_properties";
 }

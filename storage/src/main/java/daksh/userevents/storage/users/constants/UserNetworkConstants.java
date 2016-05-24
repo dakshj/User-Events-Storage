@@ -5,5 +5,12 @@ package daksh.userevents.storage.users.constants;
  */
 public final class UserNetworkConstants {
 
+    public static final String BASE_URL = "/users";
+
+    public static final String CREATE_USER = "/";
+
     public static final String USER_ID = "user_id";
+    public static final String GET_USER = "/{" + USER_ID + "}";
+
+    public static final String GET_ALL_USERS = "/";
 }
