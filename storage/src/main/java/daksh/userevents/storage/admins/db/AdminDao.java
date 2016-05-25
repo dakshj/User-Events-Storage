@@ -1,20 +1,11 @@
 package daksh.userevents.storage.admins.db;
 
-import com.mongodb.MongoClient;
 import com.mongodb.WriteResult;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Key;
-import org.mongodb.morphia.Morphia;
-import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Random;
 
 import javax.ws.rs.NotAuthorizedException;
 
@@ -23,13 +14,15 @@ import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 import daksh.userevents.storage.admins.model.Admin;
 import daksh.userevents.storage.apps.db.AppDao;
 import daksh.userevents.storage.apps.model.App;
+import daksh.userevents.storage.common.db.Dao;
 import daksh.userevents.storage.common.security.PasswordAuthentication;
+import daksh.userevents.storage.common.util.Functions;
 import daksh.userevents.storage.common.util.LruCache;
 
 /**
  * Created by daksh on 22-May-16.
  */
-public class AdminDao {
+public class AdminDao extends Dao<Admin> {
 
     private static AdminDao adminDao;
 
@@ -41,26 +34,20 @@ public class AdminDao {
         return adminDao;
     }
 
-    private final Datastore datastore;
-
     private AdminDao() {
-        //TODO need to make this server independent
-        final MongoClient mongoClient = new MongoClient("localhost");
-        final Morphia morphia = new Morphia();
-        morphia.mapPackage(AdminDataConstants.MODELS_PACKAGE, true);
-
-        datastore = morphia.createDatastore(mongoClient, AdminDataConstants.DB_NAME);
-        datastore.ensureIndexes();
+        super(new ObjectId(AdminDataConstants.COLLECTION_NAME), Admin.class);
     }
 
-    public ObjectId createAdmin(Admin admin) {
+    @Override
+    public ObjectId create(Admin admin) {
         admin.setPassword(new PasswordAuthentication().hash(admin.getPassword().toCharArray()));
-        return (ObjectId) datastore.save(admin).getId();
+        return super.create(admin);
     }
 
-    public ObjectId authenticateAdmin(Admin admin) {
-        Query<Admin> query = datastore
-                .find(Admin.class, AdminNetworkConstants.USERNAME, admin.getUsername())
+    public ObjectId authenticate(Admin admin) {
+        Query<Admin> query = getDatastore()
+                .find(getParentId().toString(), Admin.class)
+                .field(AdminNetworkConstants.USERNAME).equal(admin.getUsername())
                 .limit(1);
 
         if (query.countAll() == 0) {
@@ -79,44 +66,23 @@ public class AdminDao {
         return null;
     }
 
-    private UpdateResults updateField(ObjectId adminId, String field, String value) {
-        Query<Admin> query = datastore.createQuery(Admin.class)
-                .field(Mapper.ID_KEY).equal(adminId);
-
-        UpdateOperations<Admin> ops = datastore.createUpdateOperations(Admin.class)
-                .set(field, value);
-
-        return datastore.update(query, ops);
-    }
-
-    private UpdateResults removeField(ObjectId adminId, String field) {
-        Query<Admin> query = datastore.createQuery(Admin.class)
-                .field(Mapper.ID_KEY).equal(adminId);
-
-        UpdateOperations<Admin> ops = datastore.createUpdateOperations(Admin.class)
-                .unset(field);
-
-        return datastore.update(query, ops);
-    }
-
-    public WriteResult deleteAdmin(ObjectId adminId) {
-        WriteResult writeResult = datastore.delete(Admin.class, adminId);
-
-        AppDao.getInstance(adminId).deleteAll();
-
+    @Override
+    public WriteResult delete(ObjectId objectId) {
+        WriteResult writeResult = super.delete(objectId);
+        AppDao.getInstance(objectId).deleteAll();
         return writeResult;
     }
 
     public String regenerateAuthorizationToken(ObjectId adminId) {
-        Random random = new SecureRandom();
-        String token = new BigInteger(130, random).toString(32);
+        String token = Functions.getRandomString();
         updateField(adminId, AdminDataConstants.AUTHORIZATION_TOKEN, token);
         return token;
     }
 
     public String getAdminIdFromAuthorizationToken(String token) throws NotAuthorizedException {
-        Query<Admin> query = datastore
-                .find(Admin.class, AdminDataConstants.AUTHORIZATION_TOKEN, token).limit(1);
+        Query<Admin> query = getDatastore()
+                .find(getParentId().toString(), Admin.class)
+                .field(AdminDataConstants.AUTHORIZATION_TOKEN).equal(token).limit(1);
 
         if (query.countAll() == 0) {
             throw new NotAuthorizedException("Authorization Token is invalid");
@@ -142,7 +108,8 @@ public class AdminDao {
         }
 
         //TODO replace the below with a Mongo Query!
-        for (Key<Admin> adminKey : datastore.find(Admin.class).asKeyList()) {
+        for (Key<Admin> adminKey :
+                getDatastore().find(getParentId().toString(), Admin.class).asKeyList()) {
             for (App app : AppDao.getInstance((ObjectId) adminKey.getId()).getAll()) {
                 if (app.getAppToken().equals(token)) {
                     final ObjectId appId = app.getId();
@@ -156,8 +123,7 @@ public class AdminDao {
     }
 
     public boolean usernameExists(String username) {
-        return datastore.find(Admin.class, AdminNetworkConstants.USERNAME, username)
-                .limit(1).countAll() > 0;
+        return exists(AdminNetworkConstants.USERNAME, username);
     }
 
     public boolean logOutAdmin(ObjectId adminId) {
@@ -165,9 +131,19 @@ public class AdminDao {
         return updateResults.getWriteResult().getN() > 0;
     }
 
-    public void removeAppToken(ObjectId appId) {
+    public void removeAppTokenFromCache(ObjectId appId) {
         if (cache != null && !cache.getMap().isEmpty() && cache.getMap().containsValue(appId)) {
             cache.removeByValue(appId);
         }
+    }
+
+    @Override
+    public String getModelsPackage() {
+        return AdminDataConstants.MODELS_PACKAGE;
+    }
+
+    @Override
+    public String getDbName() {
+        return AdminDataConstants.DB_NAME;
     }
 }

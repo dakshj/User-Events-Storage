@@ -45,7 +45,7 @@ public class AdminApi {
                     .location(AdminNetworkConstants.getLoginURI()).build();
         }
 
-        ObjectId adminId = AdminDao.getInstance().createAdmin(admin);
+        ObjectId adminId = AdminDao.getInstance().create(admin);
 
         if (adminId == null) {
             return Response.serverError().entity("Failed to create Admin").build();
@@ -71,7 +71,7 @@ public class AdminApi {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        ObjectId adminId = AdminDao.getInstance().authenticateAdmin(admin);
+        ObjectId adminId = AdminDao.getInstance().authenticate(admin);
 
         if (adminId == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
@@ -114,7 +114,7 @@ public class AdminApi {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        ObjectId adminId = AdminDao.getInstance().authenticateAdmin(admin);
+        ObjectId adminId = AdminDao.getInstance().authenticate(admin);
 
         if (adminId == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
@@ -122,7 +122,7 @@ public class AdminApi {
                     .location(AdminNetworkConstants.getLoginURI()).build();
         }
 
-        WriteResult writeResult = AdminDao.getInstance().deleteAdmin(adminId);
+        WriteResult writeResult = AdminDao.getInstance().delete(adminId);
 
         if (writeResult.getN() == 0) {
             return Response.status(Response.Status.NOT_FOUND)

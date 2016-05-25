@@ -14,7 +14,7 @@ import daksh.userevents.storage.common.model.Model;
  */
 
 @XmlRootElement
-@Entity(value = AdminDataConstants.COLLECTION_NAME, noClassnameStored = true)
+@Entity(noClassnameStored = true)
 public class Admin extends Model {
 
     @XmlElement

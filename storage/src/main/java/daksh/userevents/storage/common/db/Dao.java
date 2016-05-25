@@ -2,7 +2,6 @@ package daksh.userevents.storage.common.db;
 
 import com.mongodb.MongoClient;
 import com.mongodb.WriteResult;
-import com.sun.istack.internal.Nullable;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.AdvancedDatastore;
@@ -15,31 +14,10 @@ import org.mongodb.morphia.query.UpdateResults;
 
 import java.util.List;
 
-import daksh.userevents.storage.common.util.LruCache;
-
 /**
- * Created by daksh on 24-May-16.
+ * Created by daksh on 25-May-16.
  */
 public abstract class Dao<T> {
-
-    private static LruCache<ObjectId, Dao> cache;
-
-    @Nullable
-    protected static Dao getFromMap(ObjectId adminId) {
-        if (cache == null) {
-            cache = new LruCache<>();
-        }
-
-        return cache.get(adminId);
-    }
-
-    protected static void putIntoMap(ObjectId objectId, Dao dao) {
-        if (cache == null) {
-            cache = new LruCache<>();
-        }
-
-        cache.put(objectId, dao);
-    }
 
     private final AdvancedDatastore datastore;
     private final ObjectId parentId;
@@ -89,13 +67,20 @@ public abstract class Dao<T> {
         return datastore.update(query, ops);
     }
 
-    public WriteResult delete(ObjectId objectId) {
-        WriteResult writeResult = datastore.delete(parentId.toString(), clazz, objectId);
+    protected UpdateResults removeField(ObjectId objectId, String field) {
+        Query<T> query = datastore.createQuery(parentId.toString(), clazz)
+                .field(Mapper.ID_KEY).equal(objectId);
 
-        return writeResult;
+        UpdateOperations<T> ops = datastore.createUpdateOperations(clazz).unset(field);
+
+        return datastore.update(query, ops);
     }
 
-    public void deleteAll() {
+    protected WriteResult delete(ObjectId objectId) {
+        return datastore.delete(parentId.toString(), clazz, objectId);
+    }
+
+    protected void deleteAll() {
         datastore.getMongo().getDatabase(getDbName())
                 .getCollection(parentId.toString()).drop();
     }
@@ -108,7 +93,7 @@ public abstract class Dao<T> {
         return parentId;
     }
 
-    public abstract String getModelsPackage();
+    protected abstract String getModelsPackage();
 
-    public abstract String getDbName();
+    protected abstract String getDbName();
 }

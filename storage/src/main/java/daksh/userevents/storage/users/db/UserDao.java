@@ -2,14 +2,14 @@ package daksh.userevents.storage.users.db;
 
 import org.bson.types.ObjectId;
 
-import daksh.userevents.storage.common.db.Dao;
+import daksh.userevents.storage.common.db.CollectionSpecificDao;
 import daksh.userevents.storage.users.constants.UserDataConstants;
 import daksh.userevents.storage.users.model.User;
 
 /**
  * Created by daksh on 22-May-16.
  */
-public class UserDao extends Dao<User> {
+public class UserDao extends CollectionSpecificDao<User> {
 
     public static UserDao getInstance(ObjectId appId) {
         UserDao userDao = (UserDao) getFromMap(appId);

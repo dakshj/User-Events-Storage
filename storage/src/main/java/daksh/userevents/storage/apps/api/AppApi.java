@@ -9,7 +9,6 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -25,6 +24,7 @@ import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 import daksh.userevents.storage.apps.constants.AppNetworkConstants;
 import daksh.userevents.storage.apps.db.AppDao;
 import daksh.userevents.storage.apps.model.App;
+import daksh.userevents.storage.common.util.TextUtils;
 
 /**
  * Created by daksh on 23-May-16.
@@ -35,11 +35,10 @@ public class AppApi {
 
     @AdminSecured
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createApp(@FormParam(AppNetworkConstants.NAME) String appName,
-                              @Context ContainerRequestContext requestContext) {
-        if (appName == null || appName.isEmpty()) {
+    public Response createApp(App app, @Context ContainerRequestContext requestContext) {
+        if (app == null || TextUtils.isEmpty(app.getName())) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
@@ -47,12 +46,12 @@ public class AppApi {
 
         final AppDao appDao = AppDao.getInstance(adminId);
 
-        if (appDao.exists(AppNetworkConstants.NAME, appName)) {
+        if (appDao.exists(AppNetworkConstants.NAME, app.getName())) {
             return Response.status(Response.Status.CONFLICT)
                     .entity("App Name is already in use").build();
         }
 
-        ObjectId appId = appDao.create(new App(appName));
+        ObjectId appId = appDao.create(app);
 
         if (appId == null) {
             return Response.serverError()
@@ -111,15 +110,18 @@ public class AppApi {
     @AdminSecured
     @Path(AppNetworkConstants.REGENERATE_APP_TOKEN)
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response regenerateAppToken(@FormParam(AppNetworkConstants.APP_ID) String appId,
-                                       @Context ContainerRequestContext requestContext) {
+    public Response regenerateAppToken(App app, @Context ContainerRequestContext requestContext) {
+        if (app == null || TextUtils.isEmpty(app.getId().toString())) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
         ObjectId adminId = extractAdminId(requestContext);
 
         final AppDao appDao = AppDao.getInstance(adminId);
 
-        String appToken = appDao.regenerateAppToken(new ObjectId(appId));
+        String appToken = appDao.regenerateAppToken(app.getId());
 
         if (appToken == null || appToken.isEmpty()) {
             return Response.serverError().entity("Failed to generate App Token").build();
@@ -130,13 +132,16 @@ public class AppApi {
 
     @AdminSecured
     @DELETE
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response deleteApp(@FormParam(AppNetworkConstants.APP_ID) String appId,
-                              @Context ContainerRequestContext requestContext) {
+    public Response deleteApp(App app, @Context ContainerRequestContext requestContext) {
+        if (app == null || TextUtils.isEmpty(app.getId().toString())) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
         ObjectId adminId = extractAdminId(requestContext);
 
-        WriteResult writeResult = AppDao.getInstance(adminId).delete(new ObjectId(appId));
+        WriteResult writeResult = AppDao.getInstance(adminId).delete(app.getId());
 
         if (writeResult.getN() == 0) {
             return Response.status(Response.Status.NOT_FOUND)

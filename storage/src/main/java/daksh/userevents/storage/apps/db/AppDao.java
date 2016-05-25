@@ -5,21 +5,19 @@ import com.mongodb.WriteResult;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Key;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.List;
-import java.util.Random;
 
 import daksh.userevents.storage.admins.db.AdminDao;
 import daksh.userevents.storage.apps.constants.AppDataConstants;
 import daksh.userevents.storage.apps.model.App;
-import daksh.userevents.storage.common.db.Dao;
+import daksh.userevents.storage.common.db.CollectionSpecificDao;
+import daksh.userevents.storage.common.util.Functions;
 import daksh.userevents.storage.events.db.EventDao;
 
 /**
  * Created by daksh on 23-May-16.
  */
-public class AppDao extends Dao<App> {
+public class AppDao extends CollectionSpecificDao<App> {
 
     public static AppDao getInstance(ObjectId adminId) {
         AppDao appDa = (AppDao) getFromMap(adminId);
@@ -47,10 +45,9 @@ public class AppDao extends Dao<App> {
     }
 
     public String regenerateAppToken(ObjectId appId) {
-        AdminDao.getInstance().removeAppToken(appId);
+        AdminDao.getInstance().removeAppTokenFromCache(appId);
 
-        Random random = new SecureRandom();
-        String token = new BigInteger(130, random).toString(32);
+        final String token = Functions.getRandomString();
         updateField(appId, AppDataConstants.APP_TOKEN, token);
         return token;
     }

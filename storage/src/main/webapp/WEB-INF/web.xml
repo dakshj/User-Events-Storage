@@ -10,7 +10,7 @@
                 daksh.userevents.storage.admins.api;
                 daksh.userevents.storage.apps.api;
                 daksh.userevents.storage.events.api;
-                daksh.userevents.storage.users.api;
+                daksh.userevents.storage.users.api
             </param-value>
         </init-param>
         <init-param>
