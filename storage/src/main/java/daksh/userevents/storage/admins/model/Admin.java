@@ -20,9 +20,7 @@ public class Admin extends Model {
     @XmlElement
     private String username;
 
-    @XmlElement(name = AdminDataConstants.PASSWORD_HASHED)
-    @Property(AdminDataConstants.PASSWORD_HASHED)
-    private String passwordHashed;
+    private String password;
 
     @XmlElement(name = AdminDataConstants.AUTHORIZATION_TOKEN)
     @Property(AdminDataConstants.AUTHORIZATION_TOKEN)
@@ -39,12 +37,12 @@ public class Admin extends Model {
         this.username = username;
     }
 
-    public String getPasswordHashed() {
-        return passwordHashed;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPasswordHashed(String passwordHashed) {
-        this.passwordHashed = passwordHashed;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getAuthorizationToken() {

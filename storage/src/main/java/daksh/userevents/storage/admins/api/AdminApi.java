@@ -6,7 +6,6 @@ import org.bson.types.ObjectId;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
@@ -18,7 +17,9 @@ import javax.ws.rs.core.Response;
 
 import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 import daksh.userevents.storage.admins.db.AdminDao;
+import daksh.userevents.storage.admins.model.Admin;
 import daksh.userevents.storage.common.api.AuthenticationFilter;
+import daksh.userevents.storage.common.util.TextUtils;
 
 /**
  * Created by daksh on 22-May-16.
@@ -28,24 +29,23 @@ import daksh.userevents.storage.common.api.AuthenticationFilter;
 public class AdminApi {
 
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createAdmin(@FormParam(AdminNetworkConstants.USERNAME) String username,
-                                @FormParam(AdminNetworkConstants.PASSWORD) String password,
-                                @FormParam(AdminNetworkConstants.NAME) String name) {
-        if (username == null || username.isEmpty() ||
-                password == null || password.isEmpty() ||
-                name == null || name.isEmpty()) {
+    public Response createAdmin(Admin admin) {
+        if (admin == null ||
+                TextUtils.isEmpty(admin.getUsername()) ||
+                TextUtils.isEmpty(admin.getPassword()) ||
+                TextUtils.isEmpty(admin.getUsername())) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        if (AdminDao.getInstance().usernameExists(username)) {
+        if (AdminDao.getInstance().usernameExists(admin.getUsername())) {
             return Response.status(Response.Status.CONFLICT)
                     .entity("Username is already in use")
                     .location(AdminNetworkConstants.getLoginURI()).build();
         }
 
-        ObjectId adminId = AdminDao.getInstance().createAdmin(username, password, name);
+        ObjectId adminId = AdminDao.getInstance().createAdmin(admin);
 
         if (adminId == null) {
             return Response.serverError().entity("Failed to create Admin").build();
@@ -62,16 +62,16 @@ public class AdminApi {
 
     @Path(AdminNetworkConstants.AUTHENTICATE_ADMIN)
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response authenticateAdmin(@FormParam(AdminNetworkConstants.USERNAME) String username,
-                                      @FormParam(AdminNetworkConstants.PASSWORD) String password) {
-        if (username == null || username.isEmpty() ||
-                password == null || password.isEmpty()) {
+    public Response authenticateAdmin(Admin admin) {
+        if (admin == null ||
+                TextUtils.isEmpty(admin.getUsername()) ||
+                TextUtils.isEmpty(admin.getPassword())) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        ObjectId adminId = AdminDao.getInstance().authenticateAdmin(username, password);
+        ObjectId adminId = AdminDao.getInstance().authenticateAdmin(admin);
 
         if (adminId == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
@@ -105,16 +105,16 @@ public class AdminApi {
     }
 
     @DELETE
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response deleteAdmin(@FormParam(AdminNetworkConstants.USERNAME) String username,
-                                @FormParam(AdminNetworkConstants.PASSWORD) String password) {
-        if (username == null || username.isEmpty() ||
-                password == null || password.isEmpty()) {
+    public Response deleteAdmin(Admin admin) {
+        if (admin == null ||
+                TextUtils.isEmpty(admin.getUsername()) ||
+                TextUtils.isEmpty(admin.getPassword())) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        ObjectId adminId = AdminDao.getInstance().authenticateAdmin(username, password);
+        ObjectId adminId = AdminDao.getInstance().authenticateAdmin(admin);
 
         if (adminId == null) {
             return Response.status(Response.Status.UNAUTHORIZED)

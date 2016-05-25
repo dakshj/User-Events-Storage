@@ -53,28 +53,27 @@ public class AdminDao {
         datastore.ensureIndexes();
     }
 
-    public ObjectId createAdmin(String username, String password, String name) {
-        Admin admin = new Admin();
-        admin.setUsername(username);
-        admin.setPasswordHashed(new PasswordAuthentication().hash(password.toCharArray()));
-        admin.setName(name);
+    public ObjectId createAdmin(Admin admin) {
+        admin.setPassword(new PasswordAuthentication().hash(admin.getPassword().toCharArray()));
         return (ObjectId) datastore.save(admin).getId();
     }
 
-    public ObjectId authenticateAdmin(String username, String password) {
-        Query<Admin> query = datastore.find(Admin.class, AdminNetworkConstants.USERNAME, username)
+    public ObjectId authenticateAdmin(Admin admin) {
+        Query<Admin> query = datastore
+                .find(Admin.class, AdminNetworkConstants.USERNAME, admin.getUsername())
                 .limit(1);
 
         if (query.countAll() == 0) {
             return null;
         }
 
-        Admin admin = query.iterator().next();
+        Admin adminStored = query.iterator().next();
 
-        if (admin.getUsername().equals(username) &&
+        if (adminStored.getUsername().equals(admin.getUsername()) &&
                 new PasswordAuthentication()
-                        .authenticate(password.toCharArray(), admin.getPasswordHashed())) {
-            return admin.getId();
+                        .authenticate(admin.getPassword().toCharArray(),
+                                adminStored.getPassword())) {
+            return adminStored.getId();
         }
 
         return null;
