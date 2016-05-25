@@ -30,7 +30,6 @@ import daksh.userevents.storage.events.model.Event;
 public class EventApi {
 
     @AppSecured
-    @Path(EventNetworkConstants.CREATE_EVENT)
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -73,7 +72,6 @@ public class EventApi {
     }
 
     @AppSecured
-    @Path(EventNetworkConstants.GET_ALL_EVENTS)
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)

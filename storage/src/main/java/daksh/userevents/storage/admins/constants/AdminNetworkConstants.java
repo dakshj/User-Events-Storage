@@ -9,7 +9,6 @@ public final class AdminNetworkConstants {
 
     public static final String BASE_URL = "/admins";
 
-    public static final String CREATE_ADMIN = "/";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final String NAME = "name";
@@ -19,8 +18,6 @@ public final class AdminNetworkConstants {
     public static final String LOG_OUT_ADMIN = "/logout";
 
     public static final String ADMIN_ID = "admin_id";
-
-    public static final String DELETE_ADMIN = "/";
 
     public static URI getLoginURI() {
         return URI.create(AdminNetworkConstants.BASE_URL

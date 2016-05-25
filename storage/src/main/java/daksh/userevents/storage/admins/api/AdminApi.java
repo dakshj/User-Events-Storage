@@ -27,7 +27,6 @@ import daksh.userevents.storage.common.api.AuthenticationFilter;
 @Path(AdminNetworkConstants.BASE_URL)
 public class AdminApi {
 
-    @Path(AdminNetworkConstants.CREATE_ADMIN)
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
@@ -105,7 +104,6 @@ public class AdminApi {
         return Response.seeOther(AdminNetworkConstants.getLoginURI()).build();
     }
 
-    @Path(AdminNetworkConstants.DELETE_ADMIN)
     @DELETE
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)

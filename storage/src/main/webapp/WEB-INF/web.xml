@@ -6,7 +6,19 @@
         </servlet-class>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>daksh.userevents.storage</param-value>
+            <param-value>
+                daksh.userevents.storage.admins.api;
+                daksh.userevents.storage.apps.api;
+                daksh.userevents.storage.events.api;
+                daksh.userevents.storage.users.api;
+            </param-value>
+        </init-param>
+        <init-param>
+            <param-name>jersey.config.server.provider.classnames</param-name>
+            <param-value>
+                daksh.userevents.storage.admins.api.AdminAuthenticationFilter;
+                daksh.userevents.storage.apps.api.AppAuthenticationFilter
+            </param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>

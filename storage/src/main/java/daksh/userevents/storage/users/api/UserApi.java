@@ -30,7 +30,6 @@ import daksh.userevents.storage.users.model.User;
 public class UserApi {
 
     @AppSecured
-    @Path(UserNetworkConstants.CREATE_USER)
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -73,7 +72,6 @@ public class UserApi {
     }
 
     @AppSecured
-    @Path(UserNetworkConstants.GET_ALL_USERS)
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)

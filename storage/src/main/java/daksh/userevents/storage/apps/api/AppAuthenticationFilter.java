@@ -2,9 +2,7 @@ package daksh.userevents.storage.apps.api;
 
 import java.io.IOException;
 
-import javax.annotation.Priority;
 import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.ext.Provider;
@@ -19,7 +17,6 @@ import daksh.userevents.storage.common.api.AuthenticationFilter;
 
 @AppSecured
 @Provider
-@Priority(Priorities.AUTHENTICATION)
 public class AppAuthenticationFilter extends AuthenticationFilter implements ContainerRequestFilter {
 
     @Override

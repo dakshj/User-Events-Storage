@@ -34,7 +34,6 @@ import daksh.userevents.storage.apps.model.App;
 public class AppApi {
 
     @AdminSecured
-    @Path(AppNetworkConstants.CREATE_APP)
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
@@ -94,7 +93,6 @@ public class AppApi {
     }
 
     @AdminSecured
-    @Path(AppNetworkConstants.GET_ALL_APPS)
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -131,7 +129,6 @@ public class AppApi {
     }
 
     @AdminSecured
-    @Path(AppNetworkConstants.DELETE_APP)
     @DELETE
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
