@@ -37,7 +37,7 @@ public class AppApi {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createApp(App app, @Context ContainerRequestContext requestContext) {
+    public Response create(App app, @Context ContainerRequestContext requestContext) {
         if (app == null || TextUtils.isEmpty(app.getName())) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -74,8 +74,8 @@ public class AppApi {
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getApp(@PathParam(AppNetworkConstants.APP_ID) String appId,
-                           @Context ContainerRequestContext requestContext) {
+    public Response get(@PathParam(AppNetworkConstants.APP_ID) String appId,
+                        @Context ContainerRequestContext requestContext) {
         if (appId == null || appId.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -95,7 +95,7 @@ public class AppApi {
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllApps(@Context ContainerRequestContext requestContext) {
+    public Response getAll(@Context ContainerRequestContext requestContext) {
         ObjectId adminId = extractAdminId(requestContext);
 
         List<App> allApps = AppDao.getInstance(adminId).getAll();
@@ -134,7 +134,7 @@ public class AppApi {
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response deleteApp(App app, @Context ContainerRequestContext requestContext) {
+    public Response delete(App app, @Context ContainerRequestContext requestContext) {
         if (app == null || TextUtils.isEmpty(app.getId().toString())) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -151,7 +151,7 @@ public class AppApi {
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
-    private static ObjectId extractAdminId(ContainerRequestContext requestContext) {
+    public static ObjectId extractAdminId(ContainerRequestContext requestContext) {
         return new ObjectId((String) requestContext.getProperty(AdminNetworkConstants.ADMIN_ID));
     }
 }

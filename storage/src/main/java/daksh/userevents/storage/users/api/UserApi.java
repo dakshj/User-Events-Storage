@@ -33,7 +33,7 @@ public class UserApi {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createUser(User user, @Context ContainerRequestContext requestContext) {
+    public Response create(User user, @Context ContainerRequestContext requestContext) {
         if (user == null ||
                 user.getName() == null || user.getName().isEmpty() ||
                 user.getDefaultProperties() == null || user.getDefaultProperties().isEmpty()) {
@@ -50,12 +50,12 @@ public class UserApi {
     }
 
     @AppSecured
-    @Path(UserNetworkConstants.GET_USER)
+    @Path(UserNetworkConstants.GET)
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUser(@PathParam(UserNetworkConstants.USER_ID) String userId,
-                            @Context ContainerRequestContext requestContext) {
+    public Response get(@PathParam(UserNetworkConstants.USER_ID) String userId,
+                        @Context ContainerRequestContext requestContext) {
         if (userId == null || userId.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -75,7 +75,7 @@ public class UserApi {
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllUsers(@Context ContainerRequestContext requestContext) {
+    public Response getAll(@Context ContainerRequestContext requestContext) {
         ObjectId appId = extractAppId(requestContext);
 
         List<User> allUsers = UserDao.getInstance(appId).getAll();

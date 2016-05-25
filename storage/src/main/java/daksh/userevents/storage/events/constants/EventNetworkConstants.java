@@ -8,5 +8,5 @@ public final class EventNetworkConstants {
     public static final String BASE_URL = "/events";
 
     public static final String EVENT_ID = "event_id";
-    public static final String GET_EVENT = "/{" + EVENT_ID + "}";
+    public static final String GET = "/{" + EVENT_ID + "}";
 }

@@ -33,7 +33,7 @@ public class EventApi {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createEvent(Event event, @Context ContainerRequestContext requestContext) {
+    public Response create(Event event, @Context ContainerRequestContext requestContext) {
         if (event == null ||
                 event.getName() == null || event.getName().isEmpty() ||
                 event.getDefaultProperties() == null || event.getDefaultProperties().isEmpty()) {
@@ -50,12 +50,12 @@ public class EventApi {
     }
 
     @AppSecured
-    @Path(EventNetworkConstants.GET_EVENT)
+    @Path(EventNetworkConstants.GET)
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getEvent(@PathParam(EventNetworkConstants.EVENT_ID) String eventId,
-                             @Context ContainerRequestContext requestContext) {
+    public Response get(@PathParam(EventNetworkConstants.EVENT_ID) String eventId,
+                        @Context ContainerRequestContext requestContext) {
         if (eventId == null || eventId.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -75,7 +75,7 @@ public class EventApi {
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllEvents(@Context ContainerRequestContext requestContext) {
+    public Response getAll(@Context ContainerRequestContext requestContext) {
         ObjectId appId = extractAppId(requestContext);
 
         List<Event> allEvents = EventDao.getInstance(appId).getAll();

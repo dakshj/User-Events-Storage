@@ -9,8 +9,11 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -18,6 +21,7 @@ import javax.ws.rs.core.Response;
 import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 import daksh.userevents.storage.admins.db.AdminDao;
 import daksh.userevents.storage.admins.model.Admin;
+import daksh.userevents.storage.apps.api.AppApi;
 import daksh.userevents.storage.common.api.AuthenticationFilter;
 import daksh.userevents.storage.common.util.TextUtils;
 
@@ -31,7 +35,7 @@ public class AdminApi {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createAdmin(Admin admin) {
+    public Response create(Admin admin) {
         if (admin == null ||
                 TextUtils.isEmpty(admin.getUsername()) ||
                 TextUtils.isEmpty(admin.getPassword()) ||
@@ -60,11 +64,11 @@ public class AdminApi {
         return Response.created(null).entity(authorizationToken).build();
     }
 
-    @Path(AdminNetworkConstants.AUTHENTICATE_ADMIN)
+    @Path(AdminNetworkConstants.AUTHENTICATE)
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response authenticateAdmin(Admin admin) {
+    public Response authenticate(Admin admin) {
         if (admin == null ||
                 TextUtils.isEmpty(admin.getUsername()) ||
                 TextUtils.isEmpty(admin.getPassword())) {
@@ -88,11 +92,31 @@ public class AdminApi {
         return Response.ok(authorizationToken).build();
     }
 
-    @Path(AdminNetworkConstants.LOG_OUT_ADMIN)
+    @AdminSecured
+    @Path(AdminNetworkConstants.RENAME)
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response rename(Admin admin, @Context ContainerRequestContext requestContext) {
+        if (admin == null ||
+                TextUtils.isEmpty(admin.getName())) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        admin.setId(AppApi.extractAdminId(requestContext));
+
+        if (!AdminDao.getInstance().rename(admin)) {
+            return Response.serverError().entity("Failed to rename Admin").build();
+        }
+
+        return Response.ok().build();
+    }
+
+    @Path(AdminNetworkConstants.LOG_OUT)
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response logOutAdmin(@HeaderParam(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+    public Response logOut(@HeaderParam(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         try {
             String token = AuthenticationFilter.getToken(authorizationHeader);
             ObjectId adminId = new ObjectId(AdminDao.getInstance()
@@ -107,7 +131,7 @@ public class AdminApi {
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response deleteAdmin(Admin admin) {
+    public Response delete(Admin admin) {
         if (admin == null ||
                 TextUtils.isEmpty(admin.getUsername()) ||
                 TextUtils.isEmpty(admin.getPassword())) {

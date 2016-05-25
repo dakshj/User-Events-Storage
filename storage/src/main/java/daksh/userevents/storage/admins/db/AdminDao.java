@@ -146,4 +146,10 @@ public class AdminDao extends Dao<Admin> {
     public String getDbName() {
         return AdminDataConstants.DB_NAME;
     }
+
+    public boolean rename(Admin admin) {
+        UpdateResults updateResults = updateField(admin.getId(),
+                AdminNetworkConstants.NAME, admin.getName());
+        return updateResults.getUpdatedCount() > 0;
+    }
 }
