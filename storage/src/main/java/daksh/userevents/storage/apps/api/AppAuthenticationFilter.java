@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.ext.Provider;
 
 import daksh.userevents.storage.admins.db.AdminDao;
@@ -17,7 +16,7 @@ import daksh.userevents.storage.common.api.AuthenticationFilter;
 
 @AppSecured
 @Provider
-public class AppAuthenticationFilter extends AuthenticationFilter implements ContainerRequestFilter {
+public class AppAuthenticationFilter extends AuthenticationFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {

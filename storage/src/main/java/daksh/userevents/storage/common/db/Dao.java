@@ -13,11 +13,16 @@ import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
 
 import java.util.List;
+import java.util.Map;
+
+import daksh.userevents.storage.common.api.ZonedDateTimeConverter;
+import daksh.userevents.storage.common.constants.Constants;
+import daksh.userevents.storage.common.model.Model;
 
 /**
  * Created by daksh on 25-May-16.
  */
-public abstract class Dao<T> {
+public abstract class Dao<T extends Model> {
 
     private final AdvancedDatastore datastore;
     private final ObjectId parentId;
@@ -30,6 +35,7 @@ public abstract class Dao<T> {
         this.clazz = clazz;
         final MongoClient mongoClient = new MongoClient("localhost");
         final Morphia morphia = new Morphia();
+        morphia.getMapper().getConverters().addConverter(ZonedDateTimeConverter.class);
         morphia.mapPackage(getModelsPackage(), true);
 
         datastore = (AdvancedDatastore) morphia.createDatastore(mongoClient, getDbName());
@@ -42,8 +48,8 @@ public abstract class Dao<T> {
                 .limit(1).countAll() > 0;
     }
 
-    public ObjectId create(T model) {
-        return (ObjectId) datastore.save(parentId.toString(), model).getId();
+    public ObjectId create(T object) {
+        return (ObjectId) datastore.save(parentId.toString(), object).getId();
     }
 
     public T get(ObjectId objectId) {
@@ -58,13 +64,31 @@ public abstract class Dao<T> {
         return datastore.find(parentId.toString(), clazz).asKeyList();
     }
 
-    protected UpdateResults updateField(ObjectId objectId, String field, String value) {
+    public boolean updateField(ObjectId objectId, String field, String value) {
         Query<T> query = datastore.createQuery(parentId.toString(), clazz)
                 .field(Mapper.ID_KEY).equal(objectId);
 
-        UpdateOperations<T> ops = datastore.createUpdateOperations(clazz).set(field, value);
+        UpdateOperations<T> ops = datastore.createUpdateOperations(clazz)
+                .set(field, value);
 
-        return datastore.update(query, ops);
+        return datastore.update(query, ops, true).getUpdatedCount() > 0;
+    }
+
+    public boolean updateProperties(ObjectId objectId, Map<String, Object> properties) {
+        Query<T> query = datastore.createQuery(parentId.toString(), clazz)
+                .field(Mapper.ID_KEY).equal(objectId);
+
+        UpdateOperations<T> ops = datastore.createUpdateOperations(clazz);
+
+        for (String key : properties.keySet()) {
+            ops.set(Constants.PROPERTIES + "." + key, properties.get(key));
+        }
+
+        return datastore.update(query, ops, true).getUpdatedCount() > 0;
+    }
+
+    public String regenerateToken(ObjectId objectId) {
+        return null;
     }
 
     protected UpdateResults removeField(ObjectId objectId, String field) {
@@ -76,7 +100,11 @@ public abstract class Dao<T> {
         return datastore.update(query, ops);
     }
 
-    protected WriteResult delete(ObjectId objectId) {
+    public WriteResult delete(ObjectId objectId) {
+        return null;
+    }
+
+    protected WriteResult deleteActually(ObjectId objectId) {
         return datastore.delete(parentId.toString(), clazz, objectId);
     }
 

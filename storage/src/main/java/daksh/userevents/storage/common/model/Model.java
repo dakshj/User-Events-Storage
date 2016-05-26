@@ -4,17 +4,24 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Property;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
 
 import daksh.userevents.storage.common.api.ObjectIdJsonSerializer;
+import daksh.userevents.storage.common.constants.Constants;
 
 /**
  * Created by daksh on 24-May-16.
  */
 public class Model implements Serializable {
+
+    public Model() {
+    }
 
     @Id
     @XmlElement
@@ -23,6 +30,18 @@ public class Model implements Serializable {
 
     @XmlElement
     private String name;
+
+    @XmlElement(name = Constants.DATE_CREATED)
+    @Property(Constants.DATE_CREATED)
+    private ZonedDateTime dateCreated;
+
+    @XmlElement(name = Constants.DATE_UPDATED)
+    @Property(Constants.DATE_UPDATED)
+    private ZonedDateTime dateUpdated;
+
+    @XmlElement(name = Constants.PROPERTIES)
+    @Property(Constants.PROPERTIES)
+    private Map<String, Object> properties;
 
     public ObjectId getId() {
         return id;
@@ -38,5 +57,29 @@ public class Model implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public ZonedDateTime getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(ZonedDateTime dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public ZonedDateTime getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(ZonedDateTime dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
     }
 }

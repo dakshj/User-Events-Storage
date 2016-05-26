@@ -44,10 +44,10 @@ public class AdminDao extends Dao<Admin> {
         return super.create(admin);
     }
 
-    public ObjectId authenticate(Admin admin) {
+    public ObjectId authenticate(String username, String password) {
         Query<Admin> query = getDatastore()
                 .find(getParentId().toString(), Admin.class)
-                .field(AdminNetworkConstants.USERNAME).equal(admin.getUsername())
+                .field(AdminNetworkConstants.USERNAME).equal(username)
                 .limit(1);
 
         if (query.countAll() == 0) {
@@ -56,9 +56,9 @@ public class AdminDao extends Dao<Admin> {
 
         Admin adminStored = query.iterator().next();
 
-        if (adminStored.getUsername().equals(admin.getUsername()) &&
+        if (adminStored.getUsername().equals(username) &&
                 new PasswordAuthentication()
-                        .authenticate(admin.getPassword().toCharArray(),
+                        .authenticate(password.toCharArray(),
                                 adminStored.getPassword())) {
             return adminStored.getId();
         }
@@ -68,12 +68,13 @@ public class AdminDao extends Dao<Admin> {
 
     @Override
     public WriteResult delete(ObjectId objectId) {
-        WriteResult writeResult = super.delete(objectId);
+        WriteResult writeResult = super.deleteActually(objectId);
         AppDao.getInstance(objectId).deleteAll();
         return writeResult;
     }
 
-    public String regenerateAuthorizationToken(ObjectId adminId) {
+    @Override
+    public String regenerateToken(ObjectId adminId) {
         String token = Functions.getRandomString();
         updateField(adminId, AdminDataConstants.AUTHORIZATION_TOKEN, token);
         return token;
@@ -145,11 +146,5 @@ public class AdminDao extends Dao<Admin> {
     @Override
     public String getDbName() {
         return AdminDataConstants.DB_NAME;
-    }
-
-    public boolean rename(Admin admin) {
-        UpdateResults updateResults = updateField(admin.getId(),
-                AdminNetworkConstants.NAME, admin.getName());
-        return updateResults.getUpdatedCount() > 0;
     }
 }

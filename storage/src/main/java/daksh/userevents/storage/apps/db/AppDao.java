@@ -10,24 +10,33 @@ import java.util.List;
 import daksh.userevents.storage.admins.db.AdminDao;
 import daksh.userevents.storage.apps.constants.AppDataConstants;
 import daksh.userevents.storage.apps.model.App;
-import daksh.userevents.storage.common.db.CollectionSpecificDao;
+import daksh.userevents.storage.common.db.Dao;
 import daksh.userevents.storage.common.util.Functions;
+import daksh.userevents.storage.common.util.LruCache;
 import daksh.userevents.storage.events.db.EventDao;
+import daksh.userevents.storage.users.db.UserDao;
 
 /**
  * Created by daksh on 23-May-16.
  */
-public class AppDao extends CollectionSpecificDao<App> {
+public class AppDao extends Dao<App> {
+
+    private static LruCache<ObjectId, AppDao> cache;
 
     public static AppDao getInstance(ObjectId adminId) {
-        AppDao appDa = (AppDao) getFromMap(adminId);
-
-        if (appDa == null) {
-            appDa = new AppDao(adminId);
-            putIntoMap(adminId, appDa);
+        if (cache == null) {
+            cache = new LruCache<>();
         }
 
-        return appDa;
+        AppDao appDao = cache.get(adminId);
+
+        if (appDao != null) {
+            return appDao;
+        }
+
+        appDao = new AppDao(adminId);
+        cache.put(adminId, appDao);
+        return appDao;
     }
 
     private AppDao(ObjectId adminId) {
@@ -44,7 +53,8 @@ public class AppDao extends CollectionSpecificDao<App> {
         return AppDataConstants.DB_NAME;
     }
 
-    public String regenerateAppToken(ObjectId appId) {
+    @Override
+    public String regenerateToken(ObjectId appId) {
         AdminDao.getInstance().removeAppTokenFromCache(appId);
 
         final String token = Functions.getRandomString();
@@ -54,7 +64,7 @@ public class AppDao extends CollectionSpecificDao<App> {
 
     @Override
     public WriteResult delete(ObjectId objectId) {
-        WriteResult writeResult = super.delete(objectId);
+        WriteResult writeResult = super.deleteActually(objectId);
         deleteAllEventsUsers(objectId);
         return writeResult;
     }
@@ -72,7 +82,6 @@ public class AppDao extends CollectionSpecificDao<App> {
 
     private void deleteAllEventsUsers(ObjectId appId) {
         EventDao.getInstance(appId).deleteAll();
-        //TODO delete all users for this app as well
-        //UserDao.getInstance(appId).deleteAll();
+        UserDao.getInstance(appId).deleteAll();
     }
 }

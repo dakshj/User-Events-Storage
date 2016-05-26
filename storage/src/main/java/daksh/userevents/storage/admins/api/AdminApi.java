@@ -1,7 +1,5 @@
 package daksh.userevents.storage.admins.api;
 
-import com.mongodb.WriteResult;
-
 import org.bson.types.ObjectId;
 
 import javax.ws.rs.Consumes;
@@ -21,8 +19,9 @@ import javax.ws.rs.core.Response;
 import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 import daksh.userevents.storage.admins.db.AdminDao;
 import daksh.userevents.storage.admins.model.Admin;
-import daksh.userevents.storage.apps.api.AppApi;
+import daksh.userevents.storage.common.api.Api;
 import daksh.userevents.storage.common.api.AuthenticationFilter;
+import daksh.userevents.storage.common.constants.Constants;
 import daksh.userevents.storage.common.util.TextUtils;
 
 /**
@@ -30,7 +29,7 @@ import daksh.userevents.storage.common.util.TextUtils;
  */
 
 @Path(AdminNetworkConstants.BASE_URL)
-public class AdminApi {
+public class AdminApi extends Api<Admin> {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -43,25 +42,9 @@ public class AdminApi {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        if (AdminDao.getInstance().usernameExists(admin.getUsername())) {
-            return Response.status(Response.Status.CONFLICT)
-                    .entity("Username is already in use")
-                    .location(AdminNetworkConstants.getLoginURI()).build();
-        }
-
-        ObjectId adminId = AdminDao.getInstance().create(admin);
-
-        if (adminId == null) {
-            return Response.serverError().entity("Failed to create Admin").build();
-        }
-
-        String authorizationToken = AdminDao.getInstance().regenerateAuthorizationToken(adminId);
-
-        if (authorizationToken == null || authorizationToken.isEmpty()) {
-            return Response.serverError().entity("Failed to generate Authorization Token").build();
-        }
-
-        return Response.created(null).entity(authorizationToken).build();
+        return super.create(admin, AdminDao.getInstance(), AdminNetworkConstants.BASE_URL,
+                true, AdminNetworkConstants.USERNAME, admin.getUsername(),
+                true, true);
     }
 
     @Path(AdminNetworkConstants.AUTHENTICATE)
@@ -75,7 +58,8 @@ public class AdminApi {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        ObjectId adminId = AdminDao.getInstance().authenticate(admin);
+        ObjectId adminId = AdminDao.getInstance()
+                .authenticate(admin.getUsername(), admin.getPassword());
 
         if (adminId == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
@@ -83,13 +67,13 @@ public class AdminApi {
                     .location(AdminNetworkConstants.getLoginURI()).build();
         }
 
-        String authorizationToken = AdminDao.getInstance().regenerateAuthorizationToken(adminId);
+        String token = AdminDao.getInstance().regenerateToken(adminId);
 
-        if (authorizationToken == null || authorizationToken.isEmpty()) {
-            return Response.serverError().entity("Failed to generate Authorization Token").build();
+        if (TextUtils.isEmpty(token)) {
+            return Response.serverError().entity("Failed to generate token").build();
         }
 
-        return Response.ok(authorizationToken).build();
+        return Response.ok(token).build();
     }
 
     @AdminSecured
@@ -98,18 +82,22 @@ public class AdminApi {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public Response rename(Admin admin, @Context ContainerRequestContext requestContext) {
-        if (admin == null ||
-                TextUtils.isEmpty(admin.getName())) {
+        return super.updateField(extractAdminId(requestContext), AdminDao.getInstance(),
+                AdminNetworkConstants.NAME, admin.getName());
+    }
+
+    @AdminSecured
+    @Path(Constants.UPDATE_PROPERTIES)
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response updateProperties(Admin admin, @Context ContainerRequestContext requestContext) {
+        if (admin != null) {
+            admin.setId(extractAdminId(requestContext));
+            return super.updateProperties(admin, AdminDao.getInstance());
+        } else {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
-
-        admin.setId(AppApi.extractAdminId(requestContext));
-
-        if (!AdminDao.getInstance().rename(admin)) {
-            return Response.serverError().entity("Failed to rename Admin").build();
-        }
-
-        return Response.ok().build();
     }
 
     @Path(AdminNetworkConstants.LOG_OUT)
@@ -138,7 +126,8 @@ public class AdminApi {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        ObjectId adminId = AdminDao.getInstance().authenticate(admin);
+        ObjectId adminId = AdminDao.getInstance()
+                .authenticate(admin.getUsername(), admin.getPassword());
 
         if (adminId == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
@@ -146,13 +135,6 @@ public class AdminApi {
                     .location(AdminNetworkConstants.getLoginURI()).build();
         }
 
-        WriteResult writeResult = AdminDao.getInstance().delete(adminId);
-
-        if (writeResult.getN() == 0) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("Failed to delete admin").build();
-        }
-
-        return Response.status(Response.Status.NO_CONTENT).build();
+        return super.delete(admin, AdminDao.getInstance());
     }
 }

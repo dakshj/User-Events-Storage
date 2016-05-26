@@ -26,9 +26,6 @@ public class Admin extends Model {
     @Property(AdminDataConstants.AUTHORIZATION_TOKEN)
     private String authorizationToken;
 
-    public Admin() {
-    }
-
     public String getUsername() {
         return username;
     }

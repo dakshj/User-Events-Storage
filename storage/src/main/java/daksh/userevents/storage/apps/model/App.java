@@ -21,13 +21,6 @@ public class App extends Model {
     @Property(AppDataConstants.APP_TOKEN)
     private String appToken;
 
-    public App() {
-    }
-
-    public App(String name) {
-        setName(name);
-    }
-
     public String getAppToken() {
         return appToken;
     }

@@ -1,10 +1,5 @@
 package daksh.userevents.storage.users.api;
 
-import org.bson.types.ObjectId;
-
-import java.net.URI;
-import java.util.List;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -17,7 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import daksh.userevents.storage.apps.api.AppSecured;
-import daksh.userevents.storage.apps.constants.AppNetworkConstants;
+import daksh.userevents.storage.common.api.Api;
 import daksh.userevents.storage.users.constants.UserNetworkConstants;
 import daksh.userevents.storage.users.db.UserDao;
 import daksh.userevents.storage.users.model.User;
@@ -27,48 +22,16 @@ import daksh.userevents.storage.users.model.User;
  */
 
 @Path(UserNetworkConstants.BASE_URL)
-public class UserApi {
+public class UserApi extends Api<User> {
 
     @AppSecured
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public Response create(User user, @Context ContainerRequestContext requestContext) {
-        if (user == null ||
-                user.getName() == null || user.getName().isEmpty() ||
-                user.getDefaultProperties() == null || user.getDefaultProperties().isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
-        ObjectId appId = extractAppId(requestContext);
-
-        ObjectId userId = UserDao.getInstance(appId).create(user);
-
-        return Response.created(
-                URI.create(UserNetworkConstants.BASE_URL + "/" + userId)
-        ).build();
-    }
-
-    @AppSecured
-    @Path(UserNetworkConstants.GET)
-    @GET
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response get(@PathParam(UserNetworkConstants.USER_ID) String userId,
-                        @Context ContainerRequestContext requestContext) {
-        if (userId == null || userId.isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
-        ObjectId appId = extractAppId(requestContext);
-
-        User user = UserDao.getInstance(appId).get(new ObjectId(userId));
-
-        if (user == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-        return Response.ok(user).build();
+        return super.create(user,
+                UserDao.getInstance(extractAppId(requestContext)),
+                UserNetworkConstants.BASE_URL, true);
     }
 
     @AppSecured
@@ -76,18 +39,16 @@ public class UserApi {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll(@Context ContainerRequestContext requestContext) {
-        ObjectId appId = extractAppId(requestContext);
-
-        List<User> allUsers = UserDao.getInstance(appId).getAll();
-
-        if (allUsers == null) {
-            return Response.serverError().entity("Failed to fetch Apps").build();
-        }
-
-        return Response.ok(allUsers).build();
+        return super.getAll(UserDao.getInstance(extractAppId(requestContext)));
     }
 
-    private static ObjectId extractAppId(ContainerRequestContext requestContext) {
-        return new ObjectId((String) requestContext.getProperty(AppNetworkConstants.APP_ID));
+    @AppSecured
+    @Path(UserNetworkConstants.GET)
+    @GET
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response get(@PathParam(UserNetworkConstants.USER_ID) String userIdString,
+                        @Context ContainerRequestContext requestContext) {
+        return super.get(userIdString, UserDao.getInstance(extractAppId(requestContext)));
     }
 }

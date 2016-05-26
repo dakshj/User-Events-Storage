@@ -11,6 +11,4 @@ public final class AppNetworkConstants {
 
     public static final String APP_ID = "app_id";
     public static final String GET_APP = "/{" + APP_ID + "}";
-
-    public static final String REGENERATE_APP_TOKEN = "/regenerate_app_token";
 }

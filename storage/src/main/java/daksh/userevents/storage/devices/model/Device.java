@@ -1,4 +1,4 @@
-package daksh.userevents.storage.events.model;
+package daksh.userevents.storage.devices.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -20,17 +20,28 @@ import daksh.userevents.storage.users.constants.UserNetworkConstants;
 
 @XmlRootElement
 @Entity(noClassnameStored = true)
-public class Event extends Model {
+public class Device extends Model {
+
+    @XmlElement(name = DeviceNetworkConstants.DEVICE_SYSTEM_ID)
+    @Property(DeviceNetworkConstants.DEVICE_SYSTEM_ID)
+    private String deviceSystemId;
 
     @XmlElement(name = UserNetworkConstants.USER_ID)
     @Property(UserNetworkConstants.USER_ID)
     @JsonSerialize(using = ObjectIdJsonSerializer.class)
     private ObjectId userId;
 
-    @XmlElement(name = DeviceNetworkConstants.DEVICE_ID)
-    @Property(DeviceNetworkConstants.DEVICE_ID)
-    @JsonSerialize(using = ObjectIdJsonSerializer.class)
-    private ObjectId deviceId;
+    @XmlElement(name = DeviceNetworkConstants.PUSH_MESSAGING_ID)
+    @Property(DeviceNetworkConstants.PUSH_MESSAGING_ID)
+    private String pushMessagingId;
+
+    public String getDeviceSystemId() {
+        return deviceSystemId;
+    }
+
+    public void setDeviceSystemId(String deviceSystemId) {
+        this.deviceSystemId = deviceSystemId;
+    }
 
     public ObjectId getUserId() {
         return userId;
@@ -40,11 +51,11 @@ public class Event extends Model {
         this.userId = userId;
     }
 
-    public ObjectId getDeviceId() {
-        return deviceId;
+    public String getPushMessagingId() {
+        return pushMessagingId;
     }
 
-    public void setDeviceId(ObjectId deviceId) {
-        this.deviceId = deviceId;
+    public void setPushMessagingId(String pushMessagingId) {
+        this.pushMessagingId = pushMessagingId;
     }
 }

@@ -17,7 +17,8 @@
             <param-name>jersey.config.server.provider.classnames</param-name>
             <param-value>
                 daksh.userevents.storage.admins.api.AdminAuthenticationFilter;
-                daksh.userevents.storage.apps.api.AppAuthenticationFilter
+                daksh.userevents.storage.apps.api.AppAuthenticationFilter;
+                daksh.userevents.storage.common.api.ObjectMapperContextResolver;
             </param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>

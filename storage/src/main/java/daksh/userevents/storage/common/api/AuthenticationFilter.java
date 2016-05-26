@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
@@ -12,7 +13,7 @@ import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 /**
  * Created by daksh on 23-May-16.
  */
-public abstract class AuthenticationFilter {
+public abstract class AuthenticationFilter implements ContainerRequestFilter {
 
     protected void handleAuthentication(ContainerRequestContext requestContext,
                                         String key, boolean redirectToLoginOnFailure) {
