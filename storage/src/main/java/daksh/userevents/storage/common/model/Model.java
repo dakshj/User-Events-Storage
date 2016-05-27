@@ -7,7 +7,7 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Property;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -33,11 +33,11 @@ public class Model implements Serializable {
 
     @XmlElement(name = Constants.DATE_CREATED)
     @Property(Constants.DATE_CREATED)
-    private ZonedDateTime dateCreated;
+    private Date dateCreated;
 
     @XmlElement(name = Constants.DATE_UPDATED)
     @Property(Constants.DATE_UPDATED)
-    private ZonedDateTime dateUpdated;
+    private Date dateUpdated;
 
     @XmlElement(name = Constants.PROPERTIES)
     @Property(Constants.PROPERTIES)
@@ -59,19 +59,19 @@ public class Model implements Serializable {
         this.name = name;
     }
 
-    public ZonedDateTime getDateCreated() {
+    public Date getDateCreated() {
         return dateCreated;
     }
 
-    public void setDateCreated(ZonedDateTime dateCreated) {
+    public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
     }
 
-    public ZonedDateTime getDateUpdated() {
+    public Date getDateUpdated() {
         return dateUpdated;
     }
 
-    public void setDateUpdated(ZonedDateTime dateUpdated) {
+    public void setDateUpdated(Date dateUpdated) {
         this.dateUpdated = dateUpdated;
     }
 

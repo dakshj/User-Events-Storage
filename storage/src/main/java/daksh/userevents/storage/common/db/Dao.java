@@ -15,7 +15,6 @@ import org.mongodb.morphia.query.UpdateResults;
 import java.util.List;
 import java.util.Map;
 
-import daksh.userevents.storage.common.api.ZonedDateTimeConverter;
 import daksh.userevents.storage.common.constants.Constants;
 import daksh.userevents.storage.common.model.Model;
 
@@ -35,7 +34,6 @@ public abstract class Dao<T extends Model> {
         this.clazz = clazz;
         final MongoClient mongoClient = new MongoClient("localhost");
         final Morphia morphia = new Morphia();
-        morphia.getMapper().getConverters().addConverter(ZonedDateTimeConverter.class);
         morphia.mapPackage(getModelsPackage(), true);
 
         datastore = (AdvancedDatastore) morphia.createDatastore(mongoClient, getDbName());
