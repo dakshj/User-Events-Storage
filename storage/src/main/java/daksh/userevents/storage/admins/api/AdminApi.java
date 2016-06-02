@@ -108,7 +108,7 @@ public class AdminApi extends Api<Admin> {
         try {
             String token = AuthenticationFilter.getToken(authorizationHeader);
             ObjectId adminId = new ObjectId(AdminDao.getInstance()
-                    .getAdminIdFromAuthorizationToken(token));
+                    .getAdminIdFromAdminToken(token));
             AdminDao.getInstance().logOutAdmin(adminId);
         } catch (NotAuthorizedException ignored) {
         }

@@ -23,10 +23,11 @@ public class AdminAuthenticationFilter extends AuthenticationFilter {
         System.out.println("AdminAuthenticationFilter 1");
         handleAuthentication(requestContext, AdminNetworkConstants.ADMIN_ID, true);
         System.out.println("AdminAuthenticationFilter 2");
+        System.out.println("Admin I.D. =  " + requestContext.getProperty(AdminNetworkConstants.ADMIN_ID));
     }
 
     @Override
     public String getIdFromToken(String token) throws NotAuthorizedException {
-        return AdminDao.getInstance().getAdminIdFromAuthorizationToken(token);
+        return AdminDao.getInstance().getAdminIdFromAdminToken(token);
     }
 }

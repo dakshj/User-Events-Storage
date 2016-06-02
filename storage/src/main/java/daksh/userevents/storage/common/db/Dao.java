@@ -107,8 +107,7 @@ public abstract class Dao<T extends Model> {
     }
 
     protected void deleteAll() {
-        datastore.getMongo().getDatabase(getDbName())
-                .getCollection(parentId.toString()).drop();
+        datastore.getDB().getCollection(parentId.toString()).drop();
     }
 
     protected AdvancedDatastore getDatastore() {

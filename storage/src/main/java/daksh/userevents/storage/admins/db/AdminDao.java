@@ -1,9 +1,12 @@
 package daksh.userevents.storage.admins.db;
 
 import com.mongodb.WriteResult;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateResults;
 
@@ -12,8 +15,8 @@ import javax.ws.rs.NotAuthorizedException;
 import daksh.userevents.storage.admins.constants.AdminDataConstants;
 import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 import daksh.userevents.storage.admins.model.Admin;
+import daksh.userevents.storage.apps.constants.AppDataConstants;
 import daksh.userevents.storage.apps.db.AppDao;
-import daksh.userevents.storage.apps.model.App;
 import daksh.userevents.storage.common.db.Dao;
 import daksh.userevents.storage.common.security.PasswordAuthentication;
 import daksh.userevents.storage.common.util.Functions;
@@ -80,7 +83,7 @@ public class AdminDao extends Dao<Admin> {
         return token;
     }
 
-    public String getAdminIdFromAuthorizationToken(String token) throws NotAuthorizedException {
+    public String getAdminIdFromAdminToken(String token) throws NotAuthorizedException {
         Query<Admin> query = getDatastore()
                 .find(getParentId().toString(), Admin.class)
                 .field(AdminDataConstants.AUTHORIZATION_TOKEN).equal(token).limit(1);
@@ -94,26 +97,36 @@ public class AdminDao extends Dao<Admin> {
 
     private static LruCache<String, ObjectId> cache;
 
-    public String getAppIdFromAuthorizationToken(String token) throws NotAuthorizedException {
+    public String getAppIdFromAppToken(String token) throws NotAuthorizedException {
         //TODO Need to reduce the complexity of this!
+        //Right now what happens is that ALL Apps are read into memory and then checked which App ID
+        //this App Token is matched with
 
         if (cache == null) {
             cache = new LruCache<>();
-        }
-
-        if (cache.getMap().containsKey(token)) {
+            System.out.println("App Token Cache is null");
+        } else if (cache.getMap().containsKey(token)) {
+            System.out.println("App Token found in Cache");
             ObjectId appId = cache.get(token);
             if (appId != null) {
+                System.out.println("App I.D. = " + appId);
                 return appId.toString();
             }
         }
 
-        //TODO replace the below with a Mongo Query!
-        for (Key<Admin> adminKey :
-                getDatastore().find(getParentId().toString(), Admin.class).asKeyList()) {
-            for (App app : AppDao.getInstance((ObjectId) adminKey.getId()).getAll()) {
-                if (app.getAppToken().equals(token)) {
-                    final ObjectId appId = app.getId();
+        MongoDatabase database = getDatastore().getMongo().getDatabase(AppDataConstants.DB_NAME);
+
+        MongoCollection<Document> collection;
+        FindIterable<Document> documents;
+        ObjectId appId;
+        for (String collectionName : database.listCollectionNames()) {
+            collection = database.getCollection(collectionName);
+            documents = collection.find(new Document(AppDataConstants.APP_TOKEN, token));
+            for (Document document : documents) {
+                System.out.println("App Token found in DB");
+                if (document.containsKey("_id")) {
+                    appId = document.getObjectId("_id");
+                    System.out.println("App I.D. = " + appId);
                     cache.put(token, appId);
                     return appId.toString();
                 }
@@ -121,10 +134,6 @@ public class AdminDao extends Dao<Admin> {
         }
 
         throw new NotAuthorizedException("App Token is invalid");
-    }
-
-    public boolean usernameExists(String username) {
-        return exists(AdminNetworkConstants.USERNAME, username);
     }
 
     public boolean logOutAdmin(ObjectId adminId) {

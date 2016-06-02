@@ -13,6 +13,7 @@ import daksh.userevents.storage.admins.constants.AdminNetworkConstants;
 /**
  * Created by daksh on 23-May-16.
  */
+
 public abstract class AuthenticationFilter implements ContainerRequestFilter {
 
     protected void handleAuthentication(ContainerRequestContext requestContext,
@@ -53,8 +54,8 @@ public abstract class AuthenticationFilter implements ContainerRequestFilter {
         return message;
     }
 
-    public static Response getNotAuthorizedExceptionResponse(NotAuthorizedException e,
-                                                             boolean redirectToLoginOnFailure) {
+    private static Response getNotAuthorizedExceptionResponse(NotAuthorizedException e,
+                                                              boolean redirectToLoginOnFailure) {
         Response.ResponseBuilder responseBuilder = Response.status(Response.Status.UNAUTHORIZED);
 
         String message = getChallengeString(e);

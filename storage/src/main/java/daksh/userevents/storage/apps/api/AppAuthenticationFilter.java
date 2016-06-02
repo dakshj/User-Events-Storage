@@ -23,10 +23,11 @@ public class AppAuthenticationFilter extends AuthenticationFilter {
         System.out.println("AppAuthenticationFilter 1");
         handleAuthentication(requestContext, AppNetworkConstants.APP_ID, false);
         System.out.println("AppAuthenticationFilter 2");
+        System.out.println("App I.D. =  " + requestContext.getProperty(AppNetworkConstants.APP_ID));
     }
 
     @Override
     public String getIdFromToken(String token) throws NotAuthorizedException {
-        return AdminDao.getInstance().getAppIdFromAuthorizationToken(token);
+        return AdminDao.getInstance().getAppIdFromAppToken(token);
     }
 }
